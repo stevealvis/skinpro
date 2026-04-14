@@ -1,0 +1,15 @@
+from twilio.rest import Client
+import os
+
+account_sid = os.getenv("TACc4f8ba04ad6ef30445c6a6ba7deb49c0")
+auth_token = os.getenv("[AuthToken]")
+
+client = Client(account_sid, auth_token)
+
+message = client.messages.create(
+    from_='whatsapp:+14155238886',
+    body='Your appointment is coming up on July 21 at 3PM',
+    to='whatsapp:+919691504694',
+)
+
+print(message.sid)

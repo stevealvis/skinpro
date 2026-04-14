@@ -8,8 +8,9 @@ from django.contrib import messages
 from django.contrib.auth.models import User , auth
 from django.contrib.auth.decorators import login_required
 from django.db import models
-from .models import patient , doctor , diseaseinfo , consultation ,rating_review
-from chats.models import Chat,Feedback
+from .models import patient, doctor, diseaseinfo, consultation, rating_review
+from .notifications import send_appointment_notifications
+from chats.models import Chat, Feedback
 
 # Create your views here.
 
@@ -909,8 +910,16 @@ def  make_consultation(request, doctorusername):
         consultation_date = date.today()
         status = "active"
         
-        consultation_new = consultation( patient=patient_obj, doctor=doctor_obj, diseaseinfo=diseaseinfo_obj, consultation_date=consultation_date,status=status)
+        consultation_new = consultation(
+            patient=patient_obj,
+            doctor=doctor_obj,
+            diseaseinfo=diseaseinfo_obj,
+            consultation_date=consultation_date,
+            status=status,
+        )
         consultation_new.save()
+
+        send_appointment_notifications(consultation_new)
 
         # Store consultation ID in session for chat functionality
         request.session['consultation_id'] = consultation_new.id
@@ -1021,5 +1030,4 @@ def chat_messages(request):
 
 
 #-----------------------------chatting system ---------------------------------------------------
-
 

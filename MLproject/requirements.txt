@@ -13,3 +13,4 @@ Pillow
 tensorflow==2.15.1
 
 psycopg[binary]==3.1.19
+requests>=2.31.0

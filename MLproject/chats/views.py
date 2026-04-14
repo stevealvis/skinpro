@@ -3,9 +3,11 @@ from datetime import date
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.views.decorators.http import require_http_methods
+from django.urls import reverse
 
 from .models import Chat, Feedback
 from main_app.models import patient, doctor, diseaseinfo, consultation
+from main_app.notifications import send_appointment_notifications
 
 # Create your views here.
 
@@ -79,6 +81,105 @@ def get_feedback(request):
 #          return render(request, 'consultation/chat_body.html', {'chat': c})
 
 
+def _get_patient_from_user(user):
+    try:
+        return user.patient
+    except Exception:
+        return None
+
+
+def _get_last_prediction_reply(user):
+    if not user.is_authenticated:
+        return "Please sign in as a patient to see your last prediction."
+
+    patient_obj = _get_patient_from_user(user)
+    if patient_obj is None:
+        return "Last prediction is available only for patient accounts."
+
+    last_disease = (
+        diseaseinfo.objects.filter(patient=patient_obj)
+        .order_by("-id")
+        .first()
+    )
+
+    if last_disease is None:
+        return "I could not find any previous predictions for you."
+
+    name = last_disease.diseasename
+    confidence = str(last_disease.confidence)
+    method = last_disease.prediction_method
+    doctor_type = last_disease.consultdoctor
+
+    parts = [
+        "Your last prediction was " + name + ".",
+        "Confidence: " + confidence + "%.",
+    ]
+
+    if method == "image":
+        parts.append("This was predicted using the image scanner.")
+    elif method == "symptoms":
+        parts.append("This was predicted using the symptom checker.")
+
+    if doctor_type:
+        parts.append("Recommended specialist: " + doctor_type + ".")
+
+    consultation_obj = (
+        consultation.objects.filter(diseaseinfo=last_disease)
+        .order_by("-consultation_date", "-id")
+        .first()
+    )
+
+    link_html = ""
+    if consultation_obj is not None:
+        url = reverse("consultationview", args=[consultation_obj.id])
+        link_html = ' <a href="' + url + '">Open related consultation</a>.'
+
+    return " ".join(parts) + link_html
+
+
+def _get_consultation_summary_reply(user):
+    if not user.is_authenticated:
+        return "Please sign in as a patient to see your consultations."
+
+    patient_obj = _get_patient_from_user(user)
+    if patient_obj is None:
+        return "Consultation history is available only for patient accounts."
+
+    consultations = (
+        consultation.objects.filter(patient=patient_obj)
+        .order_by("-consultation_date", "-id")[:3]
+    )
+
+    if not consultations:
+        return "You do not have any consultations yet."
+
+    lines = ["Here are your recent consultations:<ul>"]
+    for c in consultations:
+        doctor_name = c.doctor.name if c.doctor else "Doctor"
+        date_text = (
+            c.consultation_date.strftime("%Y-%m-%d")
+            if c.consultation_date
+            else "date not set"
+        )
+        status_text = c.status or "unknown"
+        url = reverse("consultationview", args=[c.id])
+        line_html = (
+            '<li><a href="'
+            + url
+            + '">'
+            + date_text
+            + " - Dr. "
+            + doctor_name
+            + " ("
+            + status_text
+            + ")</a></li>"
+        )
+        lines.append(line_html)
+
+    lines.append("</ul>")
+    return " ".join(lines)
+
+
 def _get_general_chatbot_reply(message, user):
     text = message.lower()
 
@@ -94,18 +195,18 @@ def _get_general_chatbot_reply(message, user):
                 name = user.username
 
             if name:
-                return "Hello, " + name + ". I can help you check disease features and schedule appointments."
+                return "Hello, " + name + ". I can help you check disease features, view your recent results, and schedule appointments."
 
-        return "Hello. I can help you understand this platform and schedule appointments."
+        return "Hello. I can help you understand this platform, view your recent results, and schedule appointments."
 
     if "symptom" in text or "disease" in text:
-        return "To check a skin disease, go to the patient dashboard and open the symptom checker or image scanner."
+        return "To check a skin disease, go to the patient dashboard and open the symptom checker or image scanner. You can type 'book appointment' here to schedule an online consultation."
 
     if "appointment" in text or "schedule" in text or "book" in text:
         return "I can help you schedule an appointment. Say something like: Book an appointment with a dermatologist."
 
-    if "help" in text or "what can you do" in text:
-        return "I can answer basic questions about this app and help you book online consultations with doctors."
+    if "help" in text or "what can you do" in text or "options" in text:
+        return "You can ask me to book an appointment, show your last prediction, or list your recent consultations."
 
     return "I did not fully understand that. You can ask about disease checking or say you want to book an appointment."
 
@@ -128,6 +229,31 @@ def chatbot_message(request):
         return JsonResponse({"reply": "Okay, I cancelled the current assistant flow."})
 
     if not mode:
+        if any(
+            word in text
+            for word in [
+                "last result",
+                "last prediction",
+                "recent prediction",
+                "previous result",
+            ]
+        ):
+            reply = _get_last_prediction_reply(request.user)
+            return JsonResponse({"reply": reply})
+
+        if any(
+            word in text
+            for word in [
+                "my consultations",
+                "my appointments",
+                "consultation history",
+                "appointments history",
+                "recent consultations",
+            ]
+        ):
+            reply = _get_consultation_summary_reply(request.user)
+            return JsonResponse({"reply": reply})
+
         if any(word in text for word in ["appointment", "schedule", "booking", "book", "consult", "doctor"]):
             if not request.user.is_authenticated:
                 reply = "To schedule an appointment, please sign in as a patient first. You can still ask general questions."
@@ -224,12 +350,12 @@ def chatbot_message(request):
                 )
                 consultation_new.save()
 
+                send_appointment_notifications(consultation_new)
+
                 request.session["patientusername"] = patient_obj.user.username
                 request.session["doctorusername"] = selected_doctor.user.username
                 request.session["diseaseinfo_id"] = disease.id
                 request.session["consultation_id"] = consultation_new.id
-
-                from django.urls import reverse
 
                 consultation_url = reverse("consultationview", args=[consultation_new.id])
 
@@ -238,8 +364,10 @@ def chatbot_message(request):
                 reply = (
                     "Your appointment with Dr. "
                     + selected_doctor.name
-                    + " has been scheduled for today. You can open the consultation here: "
+                    + ' has been scheduled for today. You can open the consultation here: '
+                    + '<a href="'
                     + consultation_url
+                    + '">here</a>.'
                 )
                 return JsonResponse({"reply": reply})
 

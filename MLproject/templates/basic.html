@@ -244,6 +244,31 @@
     .assistant-chatbot-input-row button {
       font-size: 0.85rem;
     }
+
+    .assistant-quick-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 6px 8px 0;
+      border-top: 1px solid rgba(0, 0, 0, 0.04);
+      background: #ffffff;
+    }
+
+    .assistant-quick-action {
+      border-radius: 16px;
+      border: 1px solid rgba(102, 126, 234, 0.4);
+      padding: 4px 10px;
+      font-size: 0.78rem;
+      background: #f5f7ff;
+      color: #374151;
+      cursor: pointer;
+      transition: background 0.15s ease, transform 0.1s ease;
+    }
+
+    .assistant-quick-action:hover {
+      background: #e0e7ff;
+      transform: translateY(-1px);
+    }
   </style>
 
 
@@ -417,6 +442,12 @@
         Hi, I am your assistant. I can help you use this app and schedule appointments with doctors.
       </div>
     </div>
+    <div class="assistant-quick-actions">
+      <button class="assistant-quick-action" data-message="Book an appointment">Book appointment</button>
+      <button class="assistant-quick-action" data-message="Show my last prediction">My last result</button>
+      <button class="assistant-quick-action" data-message="Show my consultations">My consultations</button>
+      <button class="assistant-quick-action" data-message="Help">Help</button>
+    </div>
     <div class="assistant-chatbot-input-row">
       <input type="text" id="assistant-chatbot-input" class="form-control" placeholder="Type a message">
       <button id="assistant-chatbot-send" class="btn btn-primary">Send</button>
@@ -453,6 +484,7 @@
         var messages = document.getElementById("assistant-chatbot-messages");
         var input = document.getElementById("assistant-chatbot-input");
         var sendButton = document.getElementById("assistant-chatbot-send");
+        var quickActions = document.querySelectorAll(".assistant-quick-action");
 
         function getCookie(name) {
           var cookieValue = null;
@@ -474,22 +506,35 @@
           div.classList.add("assistant-message");
           if (sender === "user") {
             div.classList.add("assistant-user");
+            div.textContent = text;
           } else {
             div.classList.add("assistant-bot");
+            div.innerHTML = text;
           }
-          div.textContent = text;
           messages.appendChild(div);
           messages.scrollTop = messages.scrollHeight;
         }
 
-        function sendMessage() {
-          var text = input.value.trim();
-          if (!text) {
+        function sendMessage(text) {
+          var value = "";
+          if (typeof text === "string" && text.trim().length > 0) {
+            value = text.trim();
+          } else if (input) {
+            value = input.value.trim();
+          }
+
+          if (!value) {
             return;
           }
 
-          addMessage("user", text);
-          input.value = "";
+          addMessage("user", value);
+          if (input) {
+            input.value = "";
+          }
+
+          if (!text) {
+            text = value;
+          }
 
           var csrftoken = getCookie("csrftoken");
           var endpoint = "{% url 'chatbot_message' %}";
@@ -502,7 +547,7 @@
               "Content-Type": "application/x-www-form-urlencoded",
               "X-CSRFToken": csrftoken
             },
-            body: "message=" + encodeURIComponent(text)
+            body: "message=" + encodeURIComponent(value)
           })
             .then(function (response) {
               return response.json();
@@ -551,6 +596,15 @@
               e.preventDefault();
               sendMessage();
             }
+          });
+        }
+
+        if (quickActions && quickActions.length > 0) {
+          quickActions.forEach(function (btn) {
+            btn.addEventListener("click", function () {
+              var text = this.getAttribute("data-message") || this.textContent;
+              sendMessage(text);
+            });
           });
         }
       });

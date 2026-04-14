@@ -153,4 +153,13 @@ STATICFILES_DIRS = [
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-DEFAULT_AUTO_FIELD='django.db.models.AutoField'
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "no-reply@example.com")
+TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID", "")
+TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN", "")
+TWILIO_FROM_SMS = os.getenv("TWILIO_FROM_SMS", "")
+TWILIO_FROM_WHATSAPP = os.getenv("TWILIO_FROM_WHATSAPP", "")
+APPOINTMENT_NOTIFICATION_CHANNELS = os.getenv(
+    "APPOINTMENT_NOTIFICATION_CHANNELS", "email,sms,whatsapp"
+)
