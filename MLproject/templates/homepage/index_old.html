@@ -1,0 +1,394 @@
+﻿
+{% extends "basic.html" %}
+{% load static %}
+
+ 
+{% block head %}
+
+<style>
+  .hero-section {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.8));
+    backdrop-filter: blur(15px);
+    border-radius: 25px;
+    padding: 60px 40px;
+    margin: 40px 0;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    text-align: center;
+  }
+
+  .hero-title {
+    font-size: 3rem;
+    font-weight: 700;
+    background: linear-gradient(45deg, #FF6B6B, #4ECDC4, #45B7D1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 30px;
+    animation: fadeInUp 1s ease-out;
+  }
+
+  .hero-description {
+    font-size: 1.2rem;
+    color: #555;
+    line-height: 1.8;
+    margin-bottom: 40px;
+    animation: fadeInUp 1s ease-out 0.2s both;
+  }
+
+  .cta-button {
+    background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+    color: white;
+    border: none;
+    padding: 15px 40px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    border-radius: 50px;
+    box-shadow: 0 10px 30px rgba(255, 107, 107, 0.3);
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    animation: fadeInUp 1s ease-out 0.4s both;
+  }
+
+  .cta-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 40px rgba(255, 107, 107, 0.4);
+    color: white;
+  }
+
+  .user-type-section {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 25px;
+    padding: 50px 40px;
+    margin: 40px 0;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .user-type-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 40px;
+    text-align: center;
+  }
+
+  .user-type-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 30px;
+    justify-items: center;
+  }
+
+  .user-type-link {
+    display: block;
+    text-decoration: none;
+    transition: all 0.3s ease;
+  }
+
+  .user-type-link:hover {
+    transform: translateY(-10px) scale(1.05);
+  }
+
+  .user-type-img {
+    width: 200px;
+    height: 200px;
+    border-radius: 20px;
+    border: 4px solid var(--accent-bright);
+    box-shadow: 0 10px 30px rgba(69, 183, 209, 0.2);
+    transition: all 0.3s ease;
+  }
+
+  .user-type-img:hover {
+    border-color: var(--primary-bright);
+    box-shadow: 0 15px 40px rgba(255, 107, 107, 0.3);
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .hero-title {
+      font-size: 2rem;
+    }
+    
+    .hero-description {
+      font-size: 1rem;
+    }
+    
+    .user-type-grid {
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+  }
+</style>
+
+{% endblock %}
+
+
+
+
+{% block body %}
+
+
+    
+<div class="jumbotron">
+    <h3 class="display-5">Be your own doctor...</h3>
+    <p class="lead">
+            It might have happened so many times that you or someone yours need doctor’s help immediately,
+             but they are not available due to some reasons.The Disease Prediction system is an end user
+              support and online consultation project. Here, we propose a web application that allow users 
+              to get instant guidance on their disease through an intelligent system. The application is 
+              fed with various details and the disease associated with those details.The application allows
+               user to share their disease related issues.It then processes user specific details to check 
+               for various illness that could be associated with it.Here we use some intelligent data mining
+                techniques to guess the most accurate illness that could be associated with patient’s details.
+                Based on result, patient can contact doctor accordingly for further treatment.
+    
+                
+  
+     {% if user.is_authenticated %}
+
+     
+     {% else %}
+
+      <p class="lead">
+      <button type="button" class="btn btn-primary btn-lg"  data-toggle="modal" data-target=".bd-example-modal-lg">Get started</button>
+      </p>
+    
+
+</div>
+
+<br><br><br>
+<div class="container mt-5 mb-3" style="width:fit-content;">
+      <center>
+        <h1>Sign-In  As</h1>
+        </center>
+      
+      
+      <form>
+          <div class="container mt-5 mb-5">
+       <div class="row">
+          <div class="col">
+             <a href="{% url 'sign_in_admin' %}">
+      <img  alt="admin" src="{% static 'logo/admin.PNG' %}"  class="img">
+      </a>
+          </div>
+      
+          <div class="col">
+      <a href="{% url 'sign_in_doctor' %}">
+      <img  alt="doctor" src="{% static 'homepage/doctor.PNG' %}"  class="img">
+      </a>
+          </div>
+      
+          <div class="col">
+      <a href="{% url 'sign_in_patient' %}">
+      <img  alt="patient" src="{% static 'logo/patient.PNG' %}"  class="img">
+      </a>
+          </div>
+        </div>
+        </div>
+      </form>
+</div>
+
+
+    
+
+    {% endif %}
+
+<br><br>
+
+
+
+
+<!-- Large modal -->
+
+<div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+   
+<center>
+  <h1>Sign-In  As</h1>
+  </center>
+<br><br>
+
+<center>
+<form>
+    <div class="container mt-5 mb-5">
+ <div class="row">
+    <div class="col">
+       <a href="{% url 'sign_in_admin' %}">
+<img  alt="admin" src="{% static 'logo/admin.PNG' %}"  class="img">
+</a>
+    </div>
+
+    <div class="col">
+<a href="{% url 'sign_in_doctor' %}">
+<img  alt="doctor" src="{% static 'homepage/doctor.PNG' %}"  class="img">
+</a>
+    </div>
+
+    <div class="col">
+<a href="{% url 'sign_in_patient' %}">
+<img  alt="patient" src="{% static 'logo/patient.PNG' %}"  class="img">
+</a>
+    </div>
+  </div>
+  </div>
+</form>
+</center>
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+<!-- Large modal -->
+
+<div class="modal fade bd-example-modal-lg2" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+   
+<center>
+  <h1>Sign-Up  As</h1>
+  </center>
+<br><br>
+
+<center>
+<form>
+    <div class="container mt-5 mb-5 ml-5 mr-5">
+ <div class="row">
+
+    <div class="col">
+<a href="{% url 'signup_doctor' %}">
+<img  alt="doctor" src="{% static 'homepage/doctor.PNG' %}"  class="img">
+</a>
+    </div>
+
+    <div class="col">
+<a href="{% url 'signup_patient' %}">
+<img  alt="patient" src="{% static 'logo/patient.PNG' %}"  class="img">
+</a>
+    </div>
+  </div>
+  </div>
+</form>
+</center>
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+<br><br><br><br>
+<center><h2>Our Doctors</h2></center>
+
+<div class="container mt-5 mb-5">
+  <div class="marquee">
+      <div class="card">
+          <div class="card-body text-center">
+              <h5 class="card-title">Dr. Aquib Khan</h5>
+              <img alt="admin" src="{% static 'homepage/doctor.PNG' %}" width="200" height="150" class="rounded">
+              <p class="card-text">P&T Colony, Lalpur, Ranchi, Jharkhand 834001.</p>
+          </div>
+      </div>
+      <div class="card">
+          <div class="card-body text-center">
+              <h5 class="card-title">Dr. Ankit Ranjan</h5>
+              <img alt="admin" src="{% static 'homepage/doctor.PNG' %}" width="200" height="150" class="rounded">
+              <p class="card-text">AR Complex, Kanke, Ranchi, Jharkhand 834006.</p>
+          </div>
+      </div>
+      <div class="card">
+          <div class="card-body text-center">
+              <h5 class="card-title">DR. Jay PraKash</h5>
+              <img alt="admin" src="{% static 'homepage/doctor.PNG' %}" width="200" height="150" class="rounded">
+              <p class="card-text">Orchid Mall, Bariatu, Ranchi, Jharkhand 834001.</p>
+          </div>
+      </div>
+      
+  </div>
+</div>
+
+  
+
+<br><br><br><br>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="footer" class="card bg-dark text-white">
+      <div class="card-body">
+        Contact-
+     
+    <ul >
+     
+      <li >
+        <h5 class="mb-1">Email: skinprediction@gmail.com</h5>
+      </li>
+      <li >
+        <h5 class="mb-1">Contact no. 0123456789</h5>
+      </li>
+      <li >
+        <h5 class="mb-1">Address: Ranchi</h5>
+        <div class="footer-copyright text-center">© 2024 Copyright:
+          <a href="#"> Skindisease.com</a>
+        </div>
+      </li>
+      
+    </ul>
+  </div>
+  </div>
+
+  
+ 
+
+
+
+
+
+</div>
+
+
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+  
+    
+
+
+
+
+    
+{% endblock %}

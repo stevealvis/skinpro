@@ -1,0 +1,283 @@
+
+{% extends "basic.html" %}
+{% load static %}
+
+{% block head %}
+<link rel="stylesheet" type="text/css" href="{% static 'patient/checkdisease/dps.css' %}">
+<style>
+    .image-upload-container {
+        max-width: 800px;
+        margin: 50px auto;
+        padding: 30px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .upload-area {
+        border: 3px dashed #007bff;
+        border-radius: 10px;
+        padding: 40px;
+        text-align: center;
+        background: white;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    .upload-area:hover {
+        background: #f0f8ff;
+        border-color: #0056b3;
+    }
+    .upload-area.dragover {
+        background: #e7f3ff;
+        border-color: #0056b3;
+    }
+    .preview-image {
+        max-width: 100%;
+        max-height: 400px;
+        margin: 20px auto;
+        display: block;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    .btn-scan {
+        background: #28a745;
+        color: white;
+        padding: 12px 40px;
+        border: none;
+        border-radius: 5px;
+        font-size: 18px;
+        cursor: pointer;
+        margin-top: 20px;
+        transition: background 0.3s;
+    }
+    .btn-scan:hover {
+        background: #218838;
+    }
+    .btn-scan:disabled {
+        background: #6c757d;
+        cursor: not-allowed;
+    }
+    .result-container {
+        margin-top: 30px;
+        padding: 20px;
+        background: white;
+        border-radius: 10px;
+        display: none;
+    }
+    .result-container.show {
+        display: block;
+    }
+    .result-item {
+        margin: 10px 0;
+        padding: 10px;
+        background: #f8f9fa;
+        border-radius: 5px;
+    }
+    .result-label {
+        font-weight: bold;
+        color: #495057;
+    }
+    .result-value {
+        color: #007bff;
+        font-size: 18px;
+    }
+    .loading {
+        display: none;
+        text-align: center;
+        margin: 20px 0;
+    }
+    .loading.show {
+        display: block;
+    }
+    .spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #007bff;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="image-upload-container">
+    <h2 style="text-align: center; color: #007bff; margin-bottom: 30px;">Skin Disease Image Scanner</h2>
+    <p style="text-align: center; color: #6c757d; margin-bottom: 30px;">
+        Upload an image of the affected skin area for AI-powered disease prediction
+    </p>
+    
+    <form id="imageUploadForm" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="upload-area" id="uploadArea">
+            <input type="file" id="skinImageInput" name="skin_image" accept="image/*" style="display: none;" required>
+            <i class="fa fa-cloud-upload" style="font-size: 48px; color: #007bff; margin-bottom: 20px;"></i>
+            <h4>Click to upload or drag and drop</h4>
+            <p>Supported formats: JPG, PNG, JPEG</p>
+            <p style="color: #6c757d; font-size: 14px;">Maximum file size: 10MB</p>
+        </div>
+        
+        <div id="imagePreview" style="display: none; margin-top: 20px;">
+            <img id="previewImg" class="preview-image" alt="Preview">
+            <button type="button" onclick="removeImage()" style="margin-top: 10px; background: #dc3545; color: white; border: none; padding: 8px 20px; border-radius: 5px; cursor: pointer;">
+                Remove Image
+            </button>
+        </div>
+        
+        <div style="text-align: center;">
+            <button type="submit" class="btn-scan" id="scanBtn" disabled>
+                <i class="fa fa-search"></i> Scan Image
+            </button>
+        </div>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p style="margin-top: 10px;">Analyzing image...</p>
+        </div>
+    </form>
+    
+    <div class="result-container" id="resultContainer">
+        <h3 style="color: #28a745; margin-bottom: 20px;">Prediction Results</h3>
+        <div class="result-item">
+            <span class="result-label">Predicted Disease:</span>
+            <span class="result-value" id="predictedDisease">-</span>
+        </div>
+        <div class="result-item">
+            <span class="result-label">Confidence Score:</span>
+            <span class="result-value" id="confidenceScore">-</span>
+        </div>
+        <div class="result-item">
+            <span class="result-label">Recommended Doctor:</span>
+            <span class="result-value" id="consultDoctor">-</span>
+        </div>
+        <div style="margin-top: 20px; text-align: center;">
+            <a href="{% url 'consult_a_doctor' %}" class="btn-scan" style="text-decoration: none; display: inline-block;">
+                Consult a Doctor
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    const uploadArea = document.getElementById('uploadArea');
+    const imageInput = document.getElementById('skinImageInput');
+    const imagePreview = document.getElementById('imagePreview');
+    const previewImg = document.getElementById('previewImg');
+    const scanBtn = document.getElementById('scanBtn');
+    const form = document.getElementById('imageUploadForm');
+    const loading = document.getElementById('loading');
+    const resultContainer = document.getElementById('resultContainer');
+
+    // Click to upload
+    uploadArea.addEventListener('click', () => {
+        imageInput.click();
+    });
+
+    // Drag and drop
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            imageInput.files = files;
+            handleImageSelect(files[0]);
+        }
+    });
+
+    // File input change
+    imageInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            handleImageSelect(e.target.files[0]);
+        }
+    });
+
+    function handleImageSelect(file) {
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+            alert('Please select a valid image file');
+            return;
+        }
+
+        // Validate file size (10MB)
+        if (file.size > 10 * 1024 * 1024) {
+            alert('File size must be less than 10MB');
+            return;
+        }
+
+        // Show preview
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            previewImg.src = e.target.result;
+            imagePreview.style.display = 'block';
+            scanBtn.disabled = false;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function removeImage() {
+        imageInput.value = '';
+        imagePreview.style.display = 'none';
+        scanBtn.disabled = true;
+        resultContainer.classList.remove('show');
+    }
+
+    // Form submission
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        if (!imageInput.files.length) {
+            alert('Please select an image first');
+            return;
+        }
+
+        const formData = new FormData(form);
+        
+        // Show loading
+        loading.classList.add('show');
+        resultContainer.classList.remove('show');
+        scanBtn.disabled = true;
+
+        try {
+            const response = await fetch('{% url "scan_image" %}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                }
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                // Show results
+                document.getElementById('predictedDisease').textContent = data.predicteddisease || 'Unknown';
+                document.getElementById('confidenceScore').textContent = (data.confidencescore || '0') + '%';
+                document.getElementById('consultDoctor').textContent = data.consultdoctor || 'Dermatologist';
+                resultContainer.classList.add('show');
+            } else {
+                alert('Error: ' + (data.error || 'Prediction failed'));
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again.');
+        } finally {
+            loading.classList.remove('show');
+            scanBtn.disabled = false;
+        }
+    });
+</script>
+{% endblock %}
+

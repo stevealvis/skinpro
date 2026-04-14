@@ -1,0 +1,742 @@
+{% extends "basic.html" %}
+{% load static %}
+
+{% block head %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<link href="{% static 'css/modern-styles.css' %}" rel="stylesheet">
+<style>
+/* Enhanced Consult a Doctor Styles */
+.consult-doctors-page {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 2rem 0;
+}
+
+.page-header {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.page-header h1 {
+    background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.page-subtitle {
+    color: #666;
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+}
+
+.search-filter-section {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.search-filters {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 1rem;
+    align-items: end;
+}
+
+.search-input {
+    position: relative;
+}
+
+.search-input i {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666;
+    z-index: 1;
+}
+
+.search-input input {
+    padding-left: 3rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    height: 50px;
+    transition: border-color 0.3s ease;
+}
+
+.search-input input:focus {
+    border-color: #4ECDC4;
+    box-shadow: 0 0 0 0.2rem rgba(69, 183, 209, 0.25);
+    outline: none;
+}
+
+.filter-select {
+    height: 50px;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    transition: border-color 0.3s ease;
+}
+
+.filter-select:focus {
+    border-color: #4ECDC4;
+    box-shadow: 0 0 0 0.2rem rgba(69, 183, 209, 0.25);
+    outline: none;
+}
+
+.stats-summary {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin: 1.5rem 0;
+    flex-wrap: wrap;
+}
+
+.stat-item {
+    text-align: center;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 1rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.stat-number {
+    font-size: 1.8rem;
+    font-weight: 700;
+    background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: block;
+}
+
+.stat-label {
+    color: #666;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.doctors-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 2rem;
+}
+
+.doctor-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.doctor-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(45deg, #FF6B6B, #4ECDC4, #45B7D1, #96CEB4);
+    border-radius: 20px 20px 0 0;
+}
+
+.doctor-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+}
+
+.doctor-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.doctor-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 3px solid #fff;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+    object-fit: cover;
+    margin-right: 1rem;
+}
+
+.doctor-info {
+    flex: 1;
+}
+
+.doctor-name {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.25rem;
+}
+
+.doctor-specialization {
+    color: #4ECDC4;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.doctor-id {
+    color: #666;
+    font-size: 0.8rem;
+}
+
+.rating-display {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.rating-stars {
+    color: #FFC107;
+    font-size: 1.1rem;
+}
+
+.rating-text {
+    background: linear-gradient(45deg, #FFEAA7, #FFC107);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 600;
+}
+
+.rating-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 15px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-align: center;
+    min-width: 60px;
+}
+
+.rating-excellent {
+    background: linear-gradient(45deg, #4CAF50, #8BC34A);
+    color: white;
+}
+
+.rating-good {
+    background: linear-gradient(45deg, #2196F3, #03A9F4);
+    color: white;
+}
+
+.rating-average {
+    background: linear-gradient(45deg, #FF9800, #FFC107);
+    color: white;
+}
+
+.rating-poor {
+    background: linear-gradient(45deg, #F44336, #FF5722);
+    color: white;
+}
+
+.doctor-details {
+    margin-bottom: 1.5rem;
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    padding: 0.5rem;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.detail-icon {
+    width: 35px;
+    height: 35px;
+    background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    margin-right: 1rem;
+    font-size: 0.9rem;
+}
+
+.detail-content {
+    flex: 1;
+}
+
+.detail-label {
+    font-size: 0.7rem;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.25rem;
+}
+
+.detail-value {
+    font-size: 0.9rem;
+    color: #333;
+    font-weight: 500;
+}
+
+.doctor-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.action-btn {
+    background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+    border: none;
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    color: white;
+    font-weight: 500;
+    text-decoration: none;
+    text-align: center;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+    color: white;
+    text-decoration: none;
+}
+
+.action-btn.secondary {
+    background: linear-gradient(45deg, #45B7D1, #96CEB4);
+    box-shadow: 0 4px 15px rgba(69, 183, 209, 0.3);
+}
+
+.action-btn.secondary:hover {
+    box-shadow: 0 8px 25px rgba(69, 183, 209, 0.4);
+}
+
+.no-doctors {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.no-doctors i {
+    font-size: 4rem;
+    color: #ddd;
+    margin-bottom: 1.5rem;
+}
+
+.no-doctors h3 {
+    color: #666;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.no-doctors p {
+    color: #888;
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .search-filters {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .stats-summary {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .doctors-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .doctor-actions {
+        grid-template-columns: 1fr;
+    }
+    
+    .page-header h1 {
+        font-size: 2rem;
+    }
+    
+    .doctor-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .doctor-avatar {
+        margin-right: 0;
+        margin-bottom: 1rem;
+    }
+}
+
+/* Animation classes */
+.fade-in-up {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Filter animations */
+.filter-transition {
+    transition: all 0.3s ease;
+}
+
+.doctor-card.filtered {
+    opacity: 0.5;
+    transform: scale(0.95);
+}
+
+.doctor-card.filtered.match {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Loading state */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #4ECDC4;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="consult-doctors-page">
+    <div class="container">
+        <!-- Page Header -->
+        <div class="page-header fade-in-up">
+            <h1><i class="fas fa-user-md"></i> Consult a Doctor</h1>
+            <p class="page-subtitle">Find the perfect healthcare professional for your needs</p>
+            
+            <div class="stats-summary">
+                <div class="stat-item">
+                    <span class="stat-number">{{ dobj|length }}</span>
+                    <span class="stat-label">Available Doctors</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">
+                        {% if dobj %}
+                            {{ dobj.0.rating|default:0 }}/5
+                        {% else %}
+                            0/5
+                        {% endif %}
+                    </span>
+                    <span class="stat-label">Average Rating</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">{{ dobj|length }}</span>
+                    <span class="stat-label">Specializations</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search and Filter Section -->
+        <div class="search-filter-section fade-in-up">
+            <div class="search-filters">
+                <div class="search-input">
+                    <i class="fas fa-search"></i>
+                    <input type="text" class="form-control" placeholder="Search by doctor name or specialization..." id="searchInput">
+                </div>
+                
+                <select class="form-control filter-select" id="specializationFilter">
+                    <option value="">All Specializations</option>
+                    {% for doctor in dobj %}
+                    <option value="{{ doctor.specialization }}">{{ doctor.specialization }}</option>
+                    {% endfor %}
+                </select>
+                
+                <select class="form-control filter-select" id="ratingFilter">
+                    <option value="">All Ratings</option>
+                    <option value="4">4+ Stars</option>
+                    <option value="3">3+ Stars</option>
+                    <option value="2">2+ Stars</option>
+                    <option value="1">1+ Stars</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Doctors Grid -->
+        <div class="doctors-grid" id="doctorsGrid">
+            {% for doctor in dobj %}
+            <div class="doctor-card fade-in-up filter-transition" data-name="{{ doctor.name|lower }}" data-specialization="{{ doctor.specialization|lower }}" data-rating="{{ doctor.rating }}">
+                <div class="doctor-header">
+                    <img src="{% static 'homepage/doctor.png' %}" alt="{{ doctor.name }}" class="doctor-avatar">
+                    <div class="doctor-info">
+                        <h3 class="doctor-name">{{ doctor.name }}</h3>
+                        <p class="doctor-specialization">{{ doctor.specialization }}</p>
+                        <p class="doctor-id">ID: {{ doctor.user_id }}</p>
+                    </div>
+                </div>
+                
+                <div class="rating-display">
+                    <div class="rating-stars">
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= doctor.rating %}
+                                <i class="fas fa-star"></i>
+                            {% else %}
+                                <i class="far fa-star"></i>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <span class="rating-text">{{ doctor.rating }}/5</span>
+                    <span class="rating-badge 
+                        {% if doctor.rating >= 4 %}rating-excellent
+                        {% elif doctor.rating >= 3 %}rating-good
+                        {% elif doctor.rating >= 2 %}rating-average
+                        {% else %}rating-poor{% endif %}">
+                        {{ doctor.rating }}/5
+                    </span>
+                </div>
+                
+                <div class="doctor-details">
+                    <div class="detail-item">
+                        <div class="detail-icon"><i class="fas fa-envelope"></i></div>
+                        <div class="detail-content">
+                            <div class="detail-label">Email</div>
+                            <div class="detail-value">{{ doctor.user.email }}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <div class="detail-icon"><i class="fas fa-graduation-cap"></i></div>
+                        <div class="detail-content">
+                            <div class="detail-label">Qualification</div>
+                            <div class="detail-value">{{ doctor.qualification }}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <div class="detail-icon"><i class="fas fa-hospital"></i></div>
+                        <div class="detail-content">
+                            <div class="detail-label">Medical Council</div>
+                            <div class="detail-value">{{ doctor.State_Medical_Council }}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="doctor-actions">
+                    <form action="{% url 'dviewprofile' doctor.user.username %}" method="GET" style="width: 100%;">
+                        {% csrf_token %} 
+                        <button type="submit" class="action-btn secondary">
+                            <i class="fas fa-eye"></i> View Profile
+                        </button>
+                    </form>
+                    
+                    <form action="{% url 'make_consultation' doctor.user.username %}" method="POST" style="width: 100%;">
+                        {% csrf_token %} 
+                        <button type="submit" class="action-btn" onclick="handleConsult(this)">
+                            <i class="fas fa-stethoscope"></i> Consult
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if not dobj %}
+        <div class="no-doctors fade-in-up">
+            <i class="fas fa-user-md"></i>
+            <h3>No Doctors Available</h3>
+            <p>Currently there are no doctors available for consultation. Please check back later.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animate elements on scroll
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('fade-in-up');
+            }
+        });
+    }, observerOptions);
+
+    // Observe all doctor cards
+    document.querySelectorAll('.doctor-card').forEach(card => {
+        observer.observe(card);
+    });
+
+    // Search and filter functionality
+    const searchInput = document.getElementById('searchInput');
+    const specializationFilter = document.getElementById('specializationFilter');
+    const ratingFilter = document.getElementById('ratingFilter');
+    const doctorCards = document.querySelectorAll('.doctor-card');
+
+    function filterDoctors() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const selectedSpecialization = specializationFilter.value.toLowerCase();
+        const selectedRating = parseInt(ratingFilter.value) || 0;
+
+        doctorCards.forEach(card => {
+            const name = card.dataset.name;
+            const specialization = card.dataset.specialization;
+            const rating = parseInt(card.dataset.rating);
+
+            const matchesSearch = !searchTerm || name.includes(searchTerm) || specialization.includes(searchTerm);
+            const matchesSpecialization = !selectedSpecialization || specialization === selectedSpecialization;
+            const matchesRating = !selectedRating || rating >= selectedRating;
+
+            if (matchesSearch && matchesSpecialization && matchesRating) {
+                card.style.display = 'block';
+                card.classList.add('match');
+                card.classList.remove('filtered');
+            } else {
+                card.style.display = 'none';
+                card.classList.remove('match');
+                card.classList.add('filtered');
+            }
+        });
+    }
+
+    // Add event listeners for filters
+    searchInput.addEventListener('input', filterDoctors);
+    specializationFilter.addEventListener('change', filterDoctors);
+    ratingFilter.addEventListener('change', filterDoctors);
+
+    // Populate specialization filter with unique values
+    const specializations = [...new Set(Array.from(doctorCards).map(card => card.dataset.specialization))];
+    const select = specializationFilter;
+    
+    // Clear existing options except "All Specializations"
+    while (select.children.length > 1) {
+        select.removeChild(select.lastChild);
+    }
+    
+    // Add unique specializations
+    specializations.forEach(spec => {
+        const option = document.createElement('option');
+        option.value = spec;
+        option.textContent = spec.charAt(0).toUpperCase() + spec.slice(1);
+        select.appendChild(option);
+    });
+});
+
+function handleConsult(button) {
+    const originalContent = button.innerHTML;
+    button.innerHTML = '<span class="spinner"></span> Connecting...';
+    button.disabled = true;
+    button.classList.add('loading');
+    
+    // Simulate consultation initiation
+    setTimeout(() => {
+        button.innerHTML = '<i class="fas fa-check"></i> Connected';
+        setTimeout(() => {
+            button.innerHTML = originalContent;
+            button.disabled = false;
+            button.classList.remove('loading');
+        }, 2000);
+    }, 1000);
+}
+
+// Add hover effects to doctor cards
+document.querySelectorAll('.doctor-card').forEach(card => {
+    card.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateY(-8px) scale(1.02)';
+    });
+    
+    card.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateY(0) scale(1)';
+    });
+});
+
+// Add click animations to action buttons
+document.querySelectorAll('.action-btn').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+        const ripple = document.createElement('span');
+        ripple.classList.add('ripple');
+        this.appendChild(ripple);
+        
+        setTimeout(() => {
+            ripple.remove();
+        }, 600);
+    });
+});
+</script>
+
+<style>
+/* Ripple effect for buttons */
+.action-btn {
+    position: relative;
+    overflow: hidden;
+}
+
+.ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.6);
+    transform: scale(0);
+    animation: ripple-animation 0.6s linear;
+    pointer-events: none;
+}
+
+@keyframes ripple-animation {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+</style>
+
+{% endblock %}
+

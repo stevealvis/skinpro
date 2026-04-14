@@ -1,0 +1,594 @@
+{% extends "basic.html" %}
+{% load static %}
+
+{% block head %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<link href="{% static 'css/modern-styles.css' %}" rel="stylesheet">
+<style>
+/* Enhanced Doctor Dashboard Styles */
+.doctor-dashboard {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 2rem 0;
+}
+
+.dashboard-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.dashboard-title {
+    color: white;
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.welcome-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+.stat-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 1.5rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(45deg, #FF6B6B, #4ECDC4, #45B7D1, #96CEB4);
+    border-radius: 15px 15px 0 0;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.stat-label {
+    color: #666;
+    font-weight: 500;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.main-content {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.profile-section {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 2rem;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.profile-image {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    margin: 0 auto 1.5rem;
+    border: 5px solid #fff;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+    object-fit: cover;
+}
+
+.profile-name {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.profile-info {
+    color: #666;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
+.action-section {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.action-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.action-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.action-btn {
+    background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+    border: none;
+    border-radius: 12px;
+    padding: 1rem;
+    color: white;
+    font-weight: 500;
+    text-decoration: none;
+    text-align: center;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+    color: white;
+    text-decoration: none;
+}
+
+.action-btn.secondary {
+    background: linear-gradient(45deg, #45B7D1, #96CEB4);
+    box-shadow: 0 4px 15px rgba(69, 183, 209, 0.3);
+}
+
+.action-btn.secondary:hover {
+    box-shadow: 0 8px 25px rgba(69, 183, 209, 0.4);
+}
+
+.quick-insights {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.insight-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.insight-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+}
+
+.insight-item {
+    text-align: center;
+    padding: 1rem;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.insight-icon {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: #4ECDC4;
+}
+
+.insight-value {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.25rem;
+}
+
+.insight-label {
+    font-size: 0.8rem;
+    color: #666;
+}
+
+/* Performance badges */
+.performance-badge {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin: 0.25rem;
+}
+
+.badge-excellent {
+    background: linear-gradient(45deg, #4CAF50, #8BC34A);
+    color: white;
+}
+
+.badge-good {
+    background: linear-gradient(45deg, #2196F3, #03A9F4);
+    color: white;
+}
+
+.badge-average {
+    background: linear-gradient(45deg, #FF9800, #FFC107);
+    color: white;
+}
+
+.badge-needs-improvement {
+    background: linear-gradient(45deg, #F44336, #FF5722);
+    color: white;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .main-content {
+        grid-template-columns: 1fr;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+    }
+    
+    .action-buttons {
+        grid-template-columns: 1fr;
+    }
+    
+    .insight-grid {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    }
+    
+    .dashboard-title {
+        font-size: 2rem;
+    }
+    
+    .profile-image {
+        width: 120px;
+        height: 120px;
+    }
+}
+
+/* Animation classes */
+.fade-in-up {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="doctor-dashboard">
+    <div class="container">
+        <!-- Dashboard Header -->
+        <div class="dashboard-header fade-in-up">
+            <h1 class="dashboard-title">
+                <i class="fas fa-user-md"></i>
+                Doctor Dashboard
+            </h1>
+            <p class="text-white" style="font-size: 1.1rem; opacity: 0.9;">
+                Welcome back, Dr. {{ duser.doctor.name }}!
+            </p>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="stats-grid fade-in-up">
+            <div class="stat-card">
+                <div class="stat-number pulse">{{ total_consultations }}</div>
+                <div class="stat-label">Total Consultations</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" style="color: #4ECDC4;">{{ active_consultations }}</div>
+                <div class="stat-label">Active Consultations</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" style="color: #96CEB4;">{{ completed_consultations }}</div>
+                <div class="stat-label">Completed Consultations</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" style="color: #FFEAA7;">{{ doctor_rating }}★</div>
+                <div class="stat-label">Average Rating</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" style="color: #74B9FF;">{{ total_reviews }}</div>
+                <div class="stat-label">Total Reviews</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" style="color: #A29BFE;">{{ performance_score }}★</div>
+                <div class="stat-label">Performance Score</div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Profile Section -->
+            <div class="profile-section fade-in-up">
+                <img class="profile-image" src="{% static 'homepage/doctor.png' %}" alt="Doctor Profile">
+                
+                <h3 class="profile-name">Dr. {{ duser.doctor.name }}</h3>
+                
+                <div class="profile-info">
+                    <p><strong>Doctor ID:</strong> {{ duser.doctor.user_id }}</p>
+                    <p><strong>Email:</strong> {{ duser.email }}</p>
+                    <p><strong>Specialization:</strong> {{ duser.doctor.specialization }}</p>
+                    <p><strong>Rating:</strong> 
+                        {% if doctor_rating >= 4 %}
+                            <span class="performance-badge badge-excellent">{{ doctor_rating }}/5 - Excellent</span>
+                        {% elif doctor_rating >= 3 %}
+                            <span class="performance-badge badge-good">{{ doctor_rating }}/5 - Good</span>
+                        {% elif doctor_rating >= 2 %}
+                            <span class="performance-badge badge-average">{{ doctor_rating }}/5 - Average</span>
+                        {% else %}
+                            <span class="performance-badge badge-needs-improvement">{{ doctor_rating }}/5 - Needs Improvement</span>
+                        {% endif %}
+                    </p>
+                </div>
+                
+                <a href="{% url 'dviewprofile' duser.username %}" class="btn btn-primary" style="margin-top: 1rem;">
+                    <i class="fas fa-eye"></i> View Full Profile
+                </a>
+            </div>
+
+            <!-- Action Section -->
+            <div class="action-section fade-in-up">
+                <h3 class="action-title">
+                    <i class="fas fa-tasks"></i> Quick Actions
+                </h3>
+                
+                <div class="action-buttons">
+                    <a href="{% url 'dconsultation_history' %}" class="action-btn">
+                        <i class="fas fa-history"></i>
+                        View Consultation History
+                    </a>
+                    
+                    <a href="#" class="action-btn secondary" data-toggle="modal" data-target="#feedbackModal">
+                        <i class="fas fa-comment-medical"></i>
+                        Give Feedback
+                    </a>
+                    
+                    <a href="#" class="action-btn">
+                        <i class="fas fa-calendar-alt"></i>
+                        Schedule Management
+                    </a>
+                    
+                    <a href="#" class="action-btn secondary">
+                        <i class="fas fa-chart-line"></i>
+                        Analytics Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Insights -->
+        <div class="quick-insights fade-in-up">
+            <h3 class="insight-title">
+                <i class="fas fa-lightbulb"></i> Quick Insights
+            </h3>
+            
+            <div class="insight-grid">
+                <div class="insight-item">
+                    <div class="insight-icon"><i class="fas fa-user-check"></i></div>
+                    <div class="insight-value">
+                        {% if active_consultations > 0 %}
+                            {{ active_consultations }}
+                        {% else %}
+                            0
+                        {% endif %}
+                    </div>
+                    <div class="insight-label">Active Patients</div>
+                </div>
+                
+                <div class="insight-item">
+                    <div class="insight-icon"><i class="fas fa-star"></i></div>
+                    <div class="insight-value">{{ doctor_rating }}/5</div>
+                    <div class="insight-label">Patient Rating</div>
+                </div>
+                
+                <div class="insight-item">
+                    <div class="insight-icon"><i class="fas fa-trophy"></i></div>
+                    <div class="insight-value">{{ completed_consultations }}</div>
+                    <div class="insight-label">Cases Completed</div>
+                </div>
+                
+                <div class="insight-item">
+                    <div class="insight-icon"><i class="fas fa-percentage"></i></div>
+                    <div class="insight-value">
+                        {% if total_consultations > 0 %}
+                            {{ completed_consultations|add:0 }}%
+                        {% else %}
+                            0%
+                        {% endif %}
+                    </div>
+                    <div class="insight-label">Completion Rate</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Feedback Modal -->
+<div class="modal fade" id="feedbackModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(45deg, #4ECDC4, #45B7D1); color: white;">
+                <h5 class="modal-title">
+                    <i class="fas fa-comment-medical"></i> Provide Feedback
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" style="color: white;">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="feedbackForm">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="feedbackText">
+                            <i class="fas fa-edit"></i> Your Feedback
+                        </label>
+                        <textarea class="form-control" id="feedbackText" rows="5" 
+                                  placeholder="Share your thoughts, suggestions, or feedback about the platform..."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="feedbackCategory">
+                            <i class="fas fa-tag"></i> Category
+                        </label>
+                        <select class="form-control" id="feedbackCategory">
+                            <option value="general">General Feedback</option>
+                            <option value="feature">Feature Request</option>
+                            <option value="bug">Bug Report</option>
+                            <option value="improvement">Improvement Suggestion</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button type="button" class="btn btn-primary" id="submitFeedback" style="background: linear-gradient(45deg, #4ECDC4, #45B7D1); border: none;">
+                    <i class="fas fa-paper-plane"></i> Submit Feedback
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animate stats cards on scroll
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('fade-in-up');
+            }
+        });
+    }, observerOptions);
+
+    // Observe all stat cards
+    document.querySelectorAll('.stat-card').forEach(card => {
+        observer.observe(card);
+    });
+
+    // Feedback submission
+    document.getElementById('submitFeedback').addEventListener('click', function() {
+        const feedback = document.getElementById('feedbackText').value;
+        const category = document.getElementById('feedbackCategory').value;
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        if (!feedback.trim()) {
+            alert('Please enter your feedback before submitting.');
+            return;
+        }
+
+        // Simulate feedback submission
+        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+        this.disabled = true;
+
+        setTimeout(() => {
+            alert('Thank you for your feedback! We appreciate your input.');
+            $('#feedbackModal').modal('hide');
+            
+            // Reset form
+            document.getElementById('feedbackForm').reset();
+            this.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Feedback';
+            this.disabled = false;
+        }, 1500);
+    });
+
+    // Add hover effects to action buttons
+    document.querySelectorAll('.action-btn').forEach(btn => {
+        btn.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-2px) scale(1.02)';
+        });
+        
+        btn.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0) scale(1)';
+        });
+    });
+
+    // Real-time stats update simulation
+    function updateStats() {
+        // This would normally fetch from an API
+        console.log('Stats would be updated in real-time');
+    }
+
+    // Update stats every 30 seconds
+    setInterval(updateStats, 30000);
+});
+</script>
+{% endblock %}

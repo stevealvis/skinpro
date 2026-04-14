@@ -1,0 +1,497 @@
+{% extends "basic.html" %}
+{% load static %}
+
+{% block head %}
+
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<style>
+  .signup-container {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.9));
+    backdrop-filter: blur(20px);
+    border-radius: 25px;
+    padding: 50px;
+    margin: 40px auto;
+    max-width: 700px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+  }
+
+  .signup-title {
+    background: linear-gradient(45deg, #8E44AD, #E67E22, #3498DB);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 40px;
+    text-align: center;
+  }
+
+  .form-section {
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 20px;
+    padding: 30px;
+    margin-bottom: 30px;
+    border: 2px solid rgba(255, 179, 179, 0.3);
+  }
+
+  .section-title {
+    background: linear-gradient(45deg, #4ECDC4, #45B7D1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 25px;
+    text-align: center;
+  }
+
+  .input-container {
+    position: relative;
+    margin-bottom: 25px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 15px;
+    border: 2px solid #FFB3B3;
+    transition: all 0.3s ease;
+  }
+
+  .input-container:focus-within {
+    border-color: #8E44AD;
+    box-shadow: 0 0 20px rgba(142, 68, 173, 0.2);
+    transform: translateY(-2px);
+  }
+
+  .icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #8E44AD;
+    font-size: 18px;
+    z-index: 1;
+  }
+
+  .input-field {
+    width: 100%;
+    padding: 15px 15px 15px 50px;
+    border: none;
+    background: transparent;
+    font-size: 1rem;
+    color: #333;
+    border-radius: 13px;
+    transition: all 0.3s ease;
+  }
+
+  .input-field:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.8);
+  }
+
+  .input-field::placeholder {
+    color: #999;
+  }
+
+  .radio-container {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 15px 20px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 15px;
+    border: 2px solid #FFB3B3;
+    transition: all 0.3s ease;
+  }
+
+  .radio-container:focus-within {
+    border-color: #8E44AD;
+    box-shadow: 0 0 20px rgba(142, 68, 173, 0.2);
+  }
+
+  .radio-btn {
+    margin-right: 5px;
+    accent-color: #8E44AD;
+  }
+
+  .radio-label {
+    color: #333;
+    font-weight: 500;
+    cursor: pointer;
+    transition: color 0.3s ease;
+  }
+
+  .radio-label:hover {
+    color: #8E44AD;
+  }
+
+  .select-container {
+    position: relative;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 15px;
+    border: 2px solid #FFB3B3;
+    transition: all 0.3s ease;
+  }
+
+  .select-container:focus-within {
+    border-color: #FF6B6B;
+    box-shadow: 0 0 20px rgba(255, 107, 107, 0.2);
+  }
+
+  .select-field {
+    width: 100%;
+    padding: 15px 50px 15px 50px;
+    border: none;
+    background: transparent;
+    font-size: 1rem;
+    color: #333;
+    border-radius: 13px;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    cursor: pointer;
+  }
+
+  .select-field option {
+    background: white;
+    color: #333;
+    padding: 10px;
+  }
+
+  .submit-btn {
+    background: linear-gradient(45deg, #8E44AD, #E67E22);
+    color: white;
+    border: none;
+    padding: 15px 40px;
+    border-radius: 25px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 25px rgba(142, 68, 173, 0.3);
+    width: 100%;
+    margin-top: 20px;
+  }
+
+  .submit-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 35px rgba(142, 68, 173, 0.4);
+    background: linear-gradient(45deg, #7D3C98, #CA6F1E);
+  }
+
+  .alert {
+    background: linear-gradient(45deg, #FFE5E5, #FFF0F0);
+    border: 2px solid #FFB3B3;
+    border-radius: 15px;
+    padding: 15px;
+    margin-bottom: 25px;
+  }
+
+  .alert h3 {
+    color: #FF6B6B;
+    margin: 0;
+    font-weight: 600;
+  }
+
+  .form-row {
+    display: flex;
+    gap: 15px;
+  }
+
+  .form-col {
+    flex: 1;
+  }
+
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .signup-container {
+      padding: 30px 20px;
+      margin: 20px;
+    }
+    
+    .signup-title {
+      font-size: 2rem;
+    }
+    
+    .form-row {
+      flex-direction: column;
+      gap: 0;
+    }
+    
+    .radio-container {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
+  }
+
+  @media (max-width: 576px) {
+    .signup-container {
+      padding: 20px 15px;
+    }
+    
+    .signup-title {
+      font-size: 1.5rem;
+    }
+    
+    .submit-btn {
+      padding: 12px 30px;
+      font-size: 1rem;
+    }
+  }
+
+  /* Animation for form appearance */
+  .signup-container {
+    animation: slideInUp 0.8s ease-out;
+  }
+
+  @keyframes slideInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Input field focus animation */
+  .focus-border {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 3px;
+    background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+    transition: all 0.3s ease;
+    transform: translateX(-50%);
+  }
+</style>
+
+{% endblock %}
+
+{% block body %}
+
+<div class="container">
+  <div class="signup-container">
+    <h1 class="signup-title">
+      <i class="fa fa-user-md"></i> Sign Up As Doctor
+    </h1>
+
+    <form action='signup_doctor' method="POST">
+      {% csrf_token %}
+      
+      <center>
+        {% for message in messages %}
+        <div class="alert" role="alert">
+          <h3>{{message}}</h3>
+        </div>
+        {% endfor %}
+      </center>
+
+      <!-- Personal Information Section -->
+      <div class="form-section">
+        <h3 class="section-title"><i class="fa fa-user"></i> Personal Information</h3>
+        
+        <div class="form-row">
+          <div class="form-col">
+            <div class="input-container">
+              <i class="fa fa-user icon"></i>
+              <input class="input-field" type="text" placeholder="Username" name="username" required>
+              <span class="focus-border"></span>
+            </div>
+          </div>
+          <div class="form-col">
+            <div class="input-container">
+              <i class="fa fa-user icon"></i>
+              <input class="input-field" type="text" placeholder="Full Name" name="name" required>
+              <span class="focus-border"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="input-container">
+          <i class="fa fa-envelope icon"></i>
+          <input class="input-field" type="email" placeholder="Email Address" name="email" required>
+          <span class="focus-border"></span>
+        </div>
+
+        <div class="form-row">
+          <div class="form-col">
+            <div class="input-container">
+              <i class="fa fa-calendar icon"></i>
+              <input class="input-field" type="date" name="dob" required>
+              <span class="focus-border"></span>
+            </div>
+          </div>
+          <div class="form-col">
+            <div class="input-container">
+              <i class="fa fa-birthday-cake icon"></i>
+              <input class="input-field" type="number" placeholder="Age" name="age" min="1" max="120" required>
+              <span class="focus-border"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="radio-container">
+          <i class="fa fa-venus-mars icon"></i>
+          <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+            <label class="radio-label">
+              <input class="radio-btn" type="radio" name="gender" value="male" checked> Male
+            </label>
+            <label class="radio-label">
+              <input class="radio-btn" type="radio" name="gender" value="female"> Female
+            </label>
+            <label class="radio-label">
+              <input class="radio-btn" type="radio" name="gender" value="other"> Other
+            </label>
+          </div>
+        </div>
+
+        <div class="input-container">
+          <i class="fa fa-address-book icon"></i>
+          <input class="input-field" type="text" placeholder="Complete Address" name="address" required>
+          <span class="focus-border"></span>
+        </div>
+
+        <div class="input-container">
+          <i class="fa fa-phone icon"></i>
+          <input class="input-field" type="tel" placeholder="Mobile Number" name="mobile" required>
+          <span class="focus-border"></span>
+        </div>
+      </div>
+
+      <!-- Professional Information Section -->
+      <div class="form-section">
+        <h3 class="section-title"><i class="fa fa-id-card"></i> Professional Information</h3>
+        
+        <div class="input-container">
+          <i class="fa fa-id-card icon"></i>
+          <input class="input-field" type="text" placeholder="Medical Registration Number" name="registration_no" required>
+          <span class="focus-border"></span>
+        </div>
+
+        <div class="input-container">
+          <i class="fa fa-calendar-check icon"></i>
+          <input class="input-field" type="date" name="year_of_registration" required>
+          <span class="focus-border"></span>
+        </div>
+
+        <div class="input-container">
+          <i class="fa fa-graduation-cap icon"></i>
+          <input class="input-field" type="text" placeholder="Qualification (e.g., MBBS, MD, etc.)" name="qualification" required>
+          <span class="focus-border"></span>
+        </div>
+
+        <div class="input-container">
+          <i class="fa fa-institution icon"></i>
+          <input class="input-field" type="text" placeholder="State Medical Council" name="State_Medical_Council" required>
+          <span class="focus-border"></span>
+        </div>
+
+        <div class="select-container">
+          <i class="fa fa-stethoscope icon"></i>
+          <select class="select-field" name="specialization" required>
+            <option value="" disabled selected>Select Specialization</option>
+            <option value="Rheumatologist">Rheumatologist</option>
+            <option value="Cardiologist">Cardiologist</option>
+            <option value="ENT specialist">ENT Specialist</option>
+            <option value="Orthopedist">Orthopedist</option>
+            <option value="Neurologist">Neurologist</option>
+            <option value="Allergist/Immunologist">Allergist/Immunologist</option>
+            <option value="Urologist">Urologist</option>
+            <option value="Dermatologist">Dermatologist</option>
+            <option value="Gastroenterologist">Gastroenterologist</option>
+            <option value="General Physician">General Physician</option>
+            <option value="Pediatrician">Pediatrician</option>
+            <option value="Psychiatrist">Psychiatrist</option>
+            <option value="Oncologist">Oncologist</option>
+            <option value="Ophthalmologist">Ophthalmologist</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Security Section -->
+      <div class="form-section">
+        <h3 class="section-title"><i class="fa fa-lock"></i> Account Security</h3>
+        
+        <div class="input-container">
+          <i class="fa fa-key icon"></i>
+          <input class="input-field" type="password" placeholder="Password" name="password" required>
+          <span class="focus-border"></span>
+        </div>
+
+        <div class="input-container">
+          <i class="fa fa-check-circle icon"></i>
+          <input class="input-field" type="password" placeholder="Confirm Password" name="password1" required>
+          <span class="focus-border"></span>
+        </div>
+      </div>
+
+      <button type="submit" class="btn submit-btn">
+        <i class="fa fa-user-md"></i> Register as Doctor
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+<script>
+  // Add smooth animations and form enhancements
+  document.addEventListener('DOMContentLoaded', function() {
+    // Animate form fields on focus
+    const inputs = document.querySelectorAll('.input-field');
+    inputs.forEach(input => {
+      input.addEventListener('focus', function() {
+        this.parentElement.style.transform = 'translateY(-2px)';
+      });
+      
+      input.addEventListener('blur', function() {
+        this.parentElement.style.transform = 'translateY(0)';
+      });
+    });
+
+    // Password confirmation validation
+    const password = document.querySelector('input[name="password"]');
+    const password1 = document.querySelector('input[name="password1"]');
+    
+    if (password && password1) {
+      password1.addEventListener('input', function() {
+        if (password.value !== this.value) {
+          this.setCustomValidity('Passwords do not match');
+        } else {
+          this.setCustomValidity('');
+        }
+      });
+    }
+
+    // Phone number formatting
+    const mobile = document.querySelector('input[name="mobile"]');
+    if (mobile) {
+      mobile.addEventListener('input', function() {
+        let value = this.value.replace(/\D/g, '');
+        if (value.length > 10) {
+          value = value.substring(0, 10);
+        }
+        this.value = value;
+      });
+    }
+
+    // Registration number validation
+    const regNo = document.querySelector('input[name="registration_no"]');
+    if (regNo) {
+      regNo.addEventListener('input', function() {
+        this.value = this.value.toUpperCase();
+      });
+    }
+  });
+</script>
+
+{% endblock %}

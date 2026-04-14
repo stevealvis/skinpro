@@ -1,0 +1,321 @@
+{% extends "basic.html" %}
+{% load static %}
+
+{% block head %}
+
+<style>
+  .profile-container {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.9));
+    backdrop-filter: blur(20px);
+    border-radius: 25px;
+    padding: 40px;
+    margin: 30px 0;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+  }
+
+  .profile-title {
+    background: linear-gradient(45deg, #FF6B6B, #4ECDC4, #45B7D1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 40px;
+    text-align: center;
+  }
+
+  .profile-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.8));
+    backdrop-filter: blur(15px);
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    transition: all 0.3s ease;
+    height: 100%;
+  }
+
+  .profile-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  }
+
+  .profile-card img {
+    border-radius: 15px;
+    border: 4px solid #FFB3B3;
+    box-shadow: 0 10px 25px rgba(255, 107, 107, 0.2);
+    transition: all 0.3s ease;
+  }
+
+  .profile-card img:hover {
+    border-color: #FF6B6B;
+    box-shadow: 0 15px 35px rgba(255, 107, 107, 0.3);
+    transform: scale(1.05);
+  }
+
+  .profile-card .card-title {
+    background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 600;
+    margin-bottom: 15px;
+  }
+
+  .profile-card .card-text {
+    color: #555;
+    font-weight: 500;
+    margin-bottom: 10px;
+  }
+
+  .action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    height: 100%;
+    justify-content: center;
+  }
+
+  .action-btn {
+    background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+    color: white;
+    border: none;
+    padding: 15px 25px;
+    border-radius: 25px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 25px rgba(255, 107, 107, 0.3);
+    text-decoration: none;
+    display: block;
+    text-align: center;
+  }
+
+  .action-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 35px rgba(255, 107, 107, 0.4);
+    color: white;
+  }
+
+  .action-btn-outline {
+    background: transparent;
+    border: 2px solid #FF6B6B;
+    color: #FF6B6B;
+  }
+
+  .action-btn-outline:hover {
+    background: #FF6B6B;
+    color: white;
+  }
+
+  /* Feedback Modal Enhancements */
+  .modal-content {
+    border: none;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  }
+
+  .modal-header {
+    background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+    color: white;
+    border-radius: 20px 20px 0 0;
+    border: none;
+  }
+
+  .modal-header .close {
+    color: white;
+    opacity: 0.8;
+    font-size: 1.5rem;
+  }
+
+  .modal-header .close:hover {
+    opacity: 1;
+  }
+
+  .modal-body {
+    padding: 30px;
+  }
+
+  .form-control {
+    border: 2px solid #FFB3B3;
+    border-radius: 15px;
+    padding: 15px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+  }
+
+  .form-control:focus {
+    border-color: #FF6B6B;
+    box-shadow: 0 0 0 0.2rem rgba(255, 107, 107, 0.25);
+    outline: none;
+  }
+
+  .btn-success {
+    background: linear-gradient(45deg, #4ECDC4, #45B7D1);
+    border: none;
+    border-radius: 20px;
+    padding: 12px 30px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+
+  .btn-success:hover {
+    background: linear-gradient(45deg, #26A69A, #2196F3);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(78, 205, 196, 0.3);
+  }
+
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .profile-container {
+      padding: 20px;
+      margin: 20px 0;
+    }
+    
+    .profile-title {
+      font-size: 2rem;
+    }
+    
+    .action-buttons {
+      margin-top: 30px;
+    }
+    
+    .profile-card {
+      margin-bottom: 20px;
+    }
+  }
+
+  @media (max-width: 576px) {
+    .profile-container {
+      padding: 15px;
+    }
+    
+    .profile-title {
+      font-size: 1.5rem;
+    }
+    
+    .action-btn {
+      padding: 12px 20px;
+      font-size: 0.9rem;
+    }
+  }
+</style>
+
+{% endblock %}
+
+
+
+
+{% block body %}
+
+
+
+<br>
+<div class="container mt-2 mb-3">
+<center><h2>Patient Profile</h2>
+</center><br>
+
+
+
+
+    <div class="row">
+        <div class="col" >
+
+            <div class="card" style="width:350px">
+                <img class="card-img-top" src="{% static 'homepage/patient.png' %}" alt="Card image" style="width:100%;">
+                <div class="card-body">
+                  <h4 class="card-title">Patient name : {{puser.patient.name}}</h4>
+                  <p class="card-text">Patient ID - {{puser.patient.user_id}}</p>
+                  <p class="card-text">Patient email - {{puser.email}}</p>
+                  <a href="{% url 'pviewprofile' puser.username %}" class="btn btn-primary">View Profile</a>
+                </div>
+              </div>
+
+        </div>
+
+
+        <div class="col" >
+               <div class="row">
+            
+               <a id="links" class="btn btn-outline-info btn-block" href="{% url 'checkdisease' %}">check disease </a><br>
+               </div>
+                
+               <div class="row">
+               <a id="links" class="btn btn-outline-info btn-block" href="{% url 'scan_image' %}">scan image </a><br>
+               </div>
+                
+               <div class="row">
+                <a class="btn btn-outline-info btn-block" href="{% url 'pconsultation_history' %}">view consulation history</a><br>
+                </div>
+
+               <div class="row">
+                <button class="btn btn-outline-info btn-block" data-toggle="modal" data-target="#myModal-feedback">Give feedbacks </button><br>
+                </div>
+               
+
+                <!-- The Modal -->
+  <div class="modal fade" id="myModal-feedback">
+    <div class="modal-dialog modal-xl ">
+      <div class="modal-content">
+      
+        <!-- Modal Header -->
+        <div class="modal-header">
+          <h4 class="modal-title">Feedbacks</h4>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+        
+        <!-- Modal body -->
+        <div class="modal-body">
+            <form action="post_feedback" method="POST">   {% csrf_token %}
+              <div class="form-group">
+                <label for="comment">Give feeback:</label>
+                <textarea class="form-control" rows="5" id="feedback" name="feedback"></textarea>
+              </div>
+              
+        </div>
+        
+        <!-- Modal footer -->
+        <div class="modal-footer">
+          <button id="submit" type="submit" class="btn btn-success" data-dismiss="modal" style="color: white;">Submit</button>
+        </div>
+            </form>
+        
+      </div>
+    </div>
+  </div>
+
+               
+
+        </div>
+    </div>
+
+<script>
+
+
+  $(document).ready(function() {
+
+    $('#submit').click( function(event){
+  
+      $.ajax({
+          url :"{% url 'post_feedback' %}",
+          type : "POST",
+          data : { feedback : $('#feedback').val(),
+          csrfmiddlewaretoken : $('input[name=csrfmiddlewaretoken]').val()
+         },
+  
+          success : function(data){
+              alert(data);
+          }
+      });
+  
+  
+  });
+      
+   });
+
+</script>
+
+  
+{% endblock %}

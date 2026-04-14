@@ -1,0 +1,5 @@
+tensorflow>=2.10
+numpy>=1.19.0
+Pillow>=8.0.0
+kaggle>=1.6.0
+

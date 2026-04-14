@@ -1,0 +1,486 @@
+
+{% extends "basic.html" %}
+{% load static %}
+
+{% block head %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/modern-styles.css' %}">
+<style>
+    .image-upload-container {
+        max-width: 900px;
+        margin: 40px auto;
+        padding: 40px;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.85));
+        backdrop-filter: blur(20px);
+        border-radius: 25px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .image-upload-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #FF6B6B, #4ECDC4, #45B7D1, #96CEB4, #FFEAA7);
+        border-radius: 25px 25px 0 0;
+    }
+    
+    .upload-area {
+        border: 3px dashed #FF6B6B;
+        border-radius: 20px;
+        padding: 60px 40px;
+        text-align: center;
+        background: linear-gradient(135deg, rgba(255, 107, 107, 0.05), rgba(78, 205, 196, 0.05));
+        cursor: pointer;
+        transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .upload-area::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.5s;
+    }
+    
+    .upload-area:hover {
+        background: linear-gradient(135deg, rgba(255, 107, 107, 0.15), rgba(78, 205, 196, 0.15));
+        border-color: #4ECDC4;
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(255, 107, 107, 0.2);
+    }
+    
+    .upload-area:hover::before {
+        left: 100%;
+    }
+    
+    .upload-area.dragover {
+        background: linear-gradient(135deg, rgba(78, 205, 196, 0.2), rgba(69, 183, 209, 0.2));
+        border-color: #45B7D1;
+        transform: scale(1.02);
+        box-shadow: 0 20px 40px rgba(78, 205, 196, 0.3);
+    }
+    
+    .preview-image {
+        max-width: 100%;
+        max-height: 400px;
+        margin: 20px auto;
+        display: block;
+        border-radius: 15px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        border: 3px solid rgba(255, 107, 107, 0.3);
+        transition: all 0.3s ease;
+    }
+    
+    .preview-image:hover {
+        border-color: #FF6B6B;
+        box-shadow: 0 15px 35px rgba(255, 107, 107, 0.2);
+    }
+    
+    .btn-scan {
+        background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+        color: white;
+        padding: 15px 45px;
+        border: none;
+        border-radius: 30px;
+        font-size: 18px;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 25px;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        box-shadow: 0 8px 20px rgba(255, 107, 107, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .btn-scan::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+    
+    .btn-scan:hover {
+        background: linear-gradient(45deg, #FF5252, #26A69A);
+        transform: translateY(-3px);
+        box-shadow: 0 12px 25px rgba(255, 107, 107, 0.4);
+    }
+    
+    .btn-scan:hover::before {
+        left: 100%;
+    }
+    
+    .btn-scan:disabled {
+        background: #6c757d;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+    
+    .result-container {
+        margin-top: 30px;
+        padding: 30px;
+        background: linear-gradient(135deg, rgba(150, 206, 180, 0.1), rgba(78, 205, 196, 0.1));
+        border-radius: 20px;
+        border: 2px solid rgba(150, 206, 180, 0.3);
+        display: none;
+        animation: fadeInUp 0.6s ease-out;
+    }
+    
+    .result-container.show {
+        display: block;
+    }
+    
+    .result-item {
+        margin: 15px 0;
+        padding: 15px;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.6));
+        border-radius: 12px;
+        border-left: 4px solid #FF6B6B;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+    }
+    
+    .result-item:hover {
+        transform: translateX(5px);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .result-label {
+        font-weight: 600;
+        color: #2D3436;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 5px;
+    }
+    
+    .result-value {
+        color: #FF6B6B;
+        font-size: 20px;
+        font-weight: 700;
+    }
+    
+    .loading {
+        display: none;
+        text-align: center;
+        margin: 30px 0;
+    }
+    
+    .loading.show {
+        display: block;
+        animation: pulse 1.5s infinite;
+    }
+    
+    .spinner {
+        border: 4px solid rgba(255, 107, 107, 0.1);
+        border-top: 4px solid #FF6B6B;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 20px;
+        box-shadow: 0 0 20px rgba(255, 107, 107, 0.3);
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.05);
+        }
+        100% {
+            transform: scale(1);
+        }
+    }
+    
+    .requirements-box {
+        background: linear-gradient(135deg, rgba(255, 234, 167, 0.15), rgba(255, 193, 7, 0.1));
+        border: 2px solid #FFEAA7;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 25px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .requirements-box::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #FFEAA7, #FFB347);
+    }
+    
+    .error-container {
+        margin-top: 20px;
+        padding: 25px;
+        background: linear-gradient(135deg, rgba(255, 118, 117, 0.1), rgba(255, 107, 107, 0.1));
+        border: 2px solid #FF7675;
+        border-radius: 15px;
+        display: none;
+        animation: fadeInUp 0.6s ease-out;
+    }
+    
+    .success-container {
+        margin-top: 20px;
+        padding: 25px;
+        background: linear-gradient(135deg, rgba(150, 206, 180, 0.1), rgba(78, 205, 196, 0.1));
+        border: 2px solid #96CEB4;
+        border-radius: 15px;
+        display: none;
+        animation: fadeInUp 0.6s ease-out;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="image-upload-container">
+    <h2 style="text-align: center; color: #007bff; margin-bottom: 30px;">Skin Disease Image Scanner</h2>
+    <p style="text-align: center; color: #6c757d; margin-bottom: 30px;">
+        Upload an image of the affected skin area for AI-powered disease prediction
+    </p>
+    <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
+        <h4 style="color: #856404; margin-bottom: 10px;">📷 Image Requirements</h4>
+        <ul style="color: #856404; margin: 0; padding-left: 20px;">
+            <li>Upload only <strong>skin disease images</strong> (rashes, lesions, spots, etc.)</li>
+            <li>Ensure good lighting and clear visibility of the affected area</li>
+            <li>Images should show <strong>human skin</strong> with visible medical conditions</li>
+            <li><strong>Not suitable:</strong> Photos of faces, non-skin objects, animals, or other body parts</li>
+        </ul>
+    </div>
+    
+    <form id="imageUploadForm" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="upload-area" id="uploadArea">
+            <input type="file" id="skinImageInput" name="skin_image" accept="image/*" style="display: none;" required>
+            <i class="fa fa-cloud-upload" style="font-size: 48px; color: #007bff; margin-bottom: 20px;"></i>
+            <h4>Click to upload or drag and drop</h4>
+            <p>Supported formats: JPG, PNG, JPEG</p>
+            <p style="color: #6c757d; font-size: 14px;">Maximum file size: 10MB</p>
+        </div>
+        
+        <div id="imagePreview" style="display: none; margin-top: 20px;">
+            <img id="previewImg" class="preview-image" alt="Preview">
+            <button type="button" onclick="removeImage()" style="margin-top: 10px; background: #dc3545; color: white; border: none; padding: 8px 20px; border-radius: 5px; cursor: pointer;">
+                Remove Image
+            </button>
+        </div>
+        
+        <div style="text-align: center;">
+            <button type="submit" class="btn-scan" id="scanBtn" disabled>
+                <i class="fa fa-search"></i> Scan Image
+            </button>
+        </div>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p style="margin-top: 10px;">Analyzing image...</p>
+        </div>
+    </form>
+    
+    <div class="result-container" id="resultContainer">
+        <h3 style="color: #28a745; margin-bottom: 20px;">Prediction Results</h3>
+        <div class="result-item">
+            <span class="result-label">Predicted Disease:</span>
+            <span class="result-value" id="predictedDisease">-</span>
+        </div>
+        <div class="result-item">
+            <span class="result-label">Confidence Score:</span>
+            <span class="result-value" id="confidenceScore">-</span>
+        </div>
+        <div class="result-item">
+            <span class="result-label">Recommended Doctor:</span>
+            <span class="result-value" id="consultDoctor">-</span>
+        </div>
+        <div style="margin-top: 20px; text-align: center;">
+            <a href="{% url 'consult_a_doctor' %}" class="btn-scan" style="text-decoration: none; display: inline-block;">
+                Consult a Doctor
+            </a>
+        </div>
+    </div>
+
+    <div class="error-container" id="errorContainer" style="display: none; margin-top: 20px; padding: 20px; background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 10px;">
+        <h3 style="color: #721c24; margin-bottom: 15px;">❌ Invalid Image</h3>
+        <div id="errorMessage" style="color: #721c24; margin-bottom: 15px;"></div>
+        <div style="background: #fff; padding: 15px; border-radius: 5px; margin-top: 10px;">
+            <h4 style="color: #721c24; margin-bottom: 10px;">✅ How to take a proper skin photo:</h4>
+            <ul style="color: #721c24; margin: 0; padding-left: 20px;">
+                <li>Use good lighting (natural light is best)</li>
+                <li>Hold camera 6-12 inches from the skin</li>
+                <li>Ensure the affected area is clearly visible</li>
+                <li>Take close-up photos of rashes, lesions, or spots</li>
+                <li>Avoid photos of faces or full body shots</li>
+                <li>Make sure the image is clear and not blurry</li>
+            </ul>
+        </div>
+        <button onclick="removeImage()" style="margin-top: 15px; background: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+            Try Again
+        </button>
+    </div>
+</div>
+
+<script>
+    const uploadArea = document.getElementById('uploadArea');
+    const imageInput = document.getElementById('skinImageInput');
+    const imagePreview = document.getElementById('imagePreview');
+    const previewImg = document.getElementById('previewImg');
+    const scanBtn = document.getElementById('scanBtn');
+    const form = document.getElementById('imageUploadForm');
+    const loading = document.getElementById('loading');
+    const resultContainer = document.getElementById('resultContainer');
+    const errorContainer = document.getElementById('errorContainer');
+    const errorMessage = document.getElementById('errorMessage');
+
+    // Click to upload
+    uploadArea.addEventListener('click', () => {
+        imageInput.click();
+    });
+
+    // Drag and drop
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            imageInput.files = files;
+            handleImageSelect(files[0]);
+        }
+    });
+
+    // File input change
+    imageInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            handleImageSelect(e.target.files[0]);
+        }
+    });
+
+    function handleImageSelect(file) {
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+            alert('Please select a valid image file');
+            return;
+        }
+
+        // Validate file size (10MB)
+        if (file.size > 10 * 1024 * 1024) {
+            alert('File size must be less than 10MB');
+            return;
+        }
+
+        // Show preview
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            previewImg.src = e.target.result;
+            imagePreview.style.display = 'block';
+            scanBtn.disabled = false;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function removeImage() {
+        imageInput.value = '';
+        imagePreview.style.display = 'none';
+        scanBtn.disabled = true;
+        resultContainer.classList.remove('show');
+        errorContainer.style.display = 'none';
+        errorMessage.textContent = '';
+    }
+
+    // Form submission
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        if (!imageInput.files.length) {
+            alert('Please select an image first');
+            return;
+        }
+
+        const formData = new FormData(form);
+        
+        // Show loading
+        loading.classList.add('show');
+        resultContainer.classList.remove('show');
+        errorContainer.style.display = 'none';
+        scanBtn.disabled = true;
+
+        try {
+            const response = await fetch('{% url "scan_image" %}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                }
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                // Show results
+                document.getElementById('predictedDisease').textContent = data.predicteddisease || 'Unknown';
+                document.getElementById('confidenceScore').textContent = (data.confidencescore || '0') + '%';
+                document.getElementById('consultDoctor').textContent = data.consultdoctor || 'Dermatologist';
+                resultContainer.classList.add('show');
+            } else {
+                // Handle image validation errors
+                if (data.error === 'Invalid Image' && data.message) {
+                    errorMessage.textContent = data.message;
+                    errorContainer.style.display = 'block';
+                } else {
+                    alert('Error: ' + (data.error || data.message || 'Prediction failed'));
+                }
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again.');
+        } finally {
+            loading.classList.remove('show');
+            scanBtn.disabled = false;
+        }
+    });
+</script>
+{% endblock %}
+

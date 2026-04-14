@@ -1,0 +1,561 @@
+{% load static %}
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge"> 
+
+    <!-- Modern CSS with Bright Colors -->
+    <link rel="stylesheet" href="{% static 'css/modern-styles.css' %}">
+    
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <title>Skin Disease Prediction</title>
+    
+    <script src="https://code.jquery.com/jquery-3.4.1.js"
+            integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU="
+            crossorigin="anonymous"></script>
+   
+  <style>
+    /* Custom styles that complement the modern CSS */
+    .img {
+      position: relative;
+      float: left;
+      width: 200px;
+      height: 200px;
+      background-position: 100% 100%;
+      background-repeat: no-repeat;
+      background-size: cover;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      border: 3px solid var(--accent-bright);
+    }
+
+    .img:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 25px rgba(69, 183, 209, 0.3);
+    }
+
+    .navbar-brand h1 {
+      font-size: 1.8rem;
+      background: linear-gradient(45deg, #8E44AD, #E67E22);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin: 0;
+    }
+
+    .marquee {
+      display: flex;
+      overflow: hidden;
+      white-space: nowrap;
+      animation: marquee 15s linear infinite;
+      padding: 20px 0;
+    }
+
+    .marquee .card {
+      display: inline-block;
+      margin-right: 20px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7));
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      transition: all 0.3s ease;
+    }
+
+    .marquee .card:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+      border-color: var(--accent-bright);
+    }
+
+    .card-title, .card-text {
+      white-space: normal;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card-title {
+      color: var(--dark);
+      font-weight: 600;
+    }
+
+    .card-text {
+      color: var(--gray);
+    }
+
+    @keyframes marquee {
+      0% {
+        transform: translateX(100%);
+      }
+      100% {
+        transform: translateX(-100%);
+      }
+    }
+
+    /* Enhanced modal styling */
+    .modal-content {
+      border: none;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    .modal-header {
+      background: linear-gradient(45deg, var(--accent-bright), var(--info-bright));
+      border-radius: 20px 20px 0 0;
+      border: none;
+    }
+
+    .modal-body {
+      padding: 30px;
+    }
+
+    /* Enhanced button styles */
+    .btn-xs {
+      padding: 8px 16px;
+      font-size: 0.8rem;
+      border-radius: 20px;
+      transition: all 0.3s ease;
+    }
+
+    .btn-danger {
+      background: linear-gradient(45deg, #FF6B6B, #FF5252);
+      border: none;
+      box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+    }
+
+    .btn-danger:hover {
+      background: linear-gradient(45deg, #FF5252, #E53935);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+    }
+
+    .assistant-chatbot-toggle {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      border: none;
+      background: linear-gradient(135deg, #4ECDC4, #45B7D1);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+      cursor: pointer;
+      z-index: 1050;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .assistant-chatbot-toggle:hover {
+      transform: translateY(-2px) scale(1.03);
+      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .assistant-chatbot-container {
+      position: fixed;
+      bottom: 90px;
+      right: 20px;
+      width: 320px;
+      max-height: 420px;
+      background: rgba(255, 255, 255, 0.98);
+      border-radius: 18px;
+      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.3);
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      z-index: 1050;
+      border: 1px solid rgba(0, 0, 0, 0.06);
+    }
+
+    .assistant-chatbot-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: #fff;
+    }
+
+    .assistant-chatbot-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    .assistant-chatbot-close {
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-size: 1.1rem;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .assistant-chatbot-messages {
+      padding: 10px;
+      flex: 1;
+      overflow-y: auto;
+      background: #f8fafc;
+    }
+
+    .assistant-message {
+      max-width: 90%;
+      padding: 8px 12px;
+      border-radius: 14px;
+      margin-bottom: 8px;
+      font-size: 0.85rem;
+    }
+
+    .assistant-message.assistant-bot {
+      background: #e3f2fd;
+      color: #155799;
+      align-self: flex-start;
+    }
+
+    .assistant-message.assistant-user {
+      background: #4ECDC4;
+      color: #fff;
+      align-self: flex-end;
+    }
+
+    .assistant-chatbot-input-row {
+      display: flex;
+      padding: 8px;
+      border-top: 1px solid rgba(0, 0, 0, 0.06);
+      background: #fff;
+    }
+
+    .assistant-chatbot-input-row input {
+      flex: 1;
+      margin-right: 6px;
+      font-size: 0.85rem;
+    }
+
+    .assistant-chatbot-input-row button {
+      font-size: 0.85rem;
+    }
+  </style>
+
+
+
+
+    {% block head %}
+
+
+
+    {% endblock %}
+
+
+  
+  </head>
+
+
+  <body>
+
+
+
+      
+      
+          <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #1b405a; min-height: 90px;">
+              <a class="navbar-brand" href="{% url 'home' %}"><h1>Skin Disease Prediction </h1></a>
+              <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
+          <span class="navbar-toggler-icon"></span>
+              </button>
+              <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                  <ul class="navbar-nav ml-auto">
+                      <li class="nav-item">
+                          <a class="nav-link" href="{% url 'home' %}">Home</a>
+                      </li>
+                      <li class="nav-item">
+                          <a class="nav-link" href="{% url 'home' %}">About</a>
+                      </li>
+                      <li class="nav-item">
+                          <a class="nav-link" href="{% url 'home' %}">Contact</a>
+                      </li>
+                      
+      
+      
+                    {% if user.is_authenticated %}
+                      
+                      {% if user.patient %}
+      
+                      <li class="nav-item ml-2">
+                      <li class="nav-link" href="{% url 'patient_ui' %}" style="color: rgb(91, 252, 50);">Hello, {{user.patient.name}}</li>
+                      </li>
+                      <li class="nav-item ml-2">
+                          <a class="nav-link" href="{% url 'patient_ui' %}">Profile</a>
+                          </li>
+      
+                      {% endif %}
+                      
+                      {% if user.doctor  %}
+      
+                      <li class="nav-item ml-2">
+                        <li class="nav-link" href="{% url 'doctor_ui' %}" style="color: rgb(91, 252, 50);">Hello, Dr. {{user.doctor.name}}</li>
+                        </li>
+                        <li class="nav-item ml-2">
+                            <a class="nav-link" href="{% url 'doctor_ui' %}">Profile</a>
+                            </li>
+      
+      
+                      {% endif %}
+
+                      {% if user.is_superuser  %}
+      
+                      <li class="nav-item ml-2">
+                        <li class="nav-link" href="{% url 'admin_ui' %}" style="color: rgb(91, 252, 50);">Admin: {{user.username}}</li>
+                        </li>
+                        <li class="nav-item ml-2">
+                            <a class="nav-link" href="{% url 'admin_ui' %}">Profile</a>
+                            </li>
+      
+      
+                      {% endif %}
+      
+                      <li class="nav-item ml-2">
+      <button class="btn btn-danger btn-xs" data-toggle="modal" data-target="#logout-modal" style="color: rgb(247, 190, 188);">Log out</button>
+                        
+                      </li>
+      
+      
+      
+      
+                      <!-- Small modal -->
+      
+      <div class="modal fade" id="logout-modal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+          <div class="modal-content">
+            <div class="modal-header"><h4>Logout <i class="fa fa-lock"></i></h4></div>
+            <div class="modal-body"><i class="fa fa-question-circle"></i><span style="color: rgb(42, 187, 6);">{{user.patient.name}}</span>, Are you sure you want to log-off?</div>
+            <div class="modal-footer"><a href="{% url 'logout' %}" class="btn btn-primary btn-block">Logout</a></div>
+          </div>
+        </div>
+      </div>
+                      
+                      {% else %}
+                      
+                      <li class="nav-item ml-2">
+                          <a class="nav-link" data-toggle="modal" data-target=".bd-example-modal-lg2">Signup</a>
+                      </li>
+                      <li class="nav-item ml-">
+                          <a class="nav-link" data-toggle="modal" data-target=".bd-example-modal-lg">Signin</a>
+                      </li>
+                      
+                      {% endif %}
+      
+                  </ul>
+              </div>
+          </nav>
+      
+
+
+
+    
+<!-- Large modal -->
+
+<div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+     
+  <center>
+    <h1>Sign-In  As</h1>
+    </center>
+  <br><br>
+  
+  <center>
+  <form>
+      <div class="container mt-5 mb-5">
+   <div class="row">
+      <div class="col">
+         <a href="{% url 'sign_in_admin' %}">
+  <img  alt="admin" src="{% static 'homepage/admin.PNG' %}"  class="img">
+  </a>
+      </div>
+  
+      <div class="col">
+  <a href="{% url 'sign_in_doctor' %}">
+  <img  alt="doctor" src="{% static 'homepage/doctor.PNG' %}"  class="img">
+  </a>
+      </div>
+  
+      <div class="col">
+  <a href="{% url 'sign_in_patient' %}">
+  <img  alt="patient" src="{% static 'homepage/patient.PNG' %}"  class="img">
+  </a>
+      </div>
+    </div>
+    </div>
+  </form>
+  </center>
+  
+      </div>
+    </div>
+  </div>
+
+
+
+  <div id="assistant-chatbot-container" class="assistant-chatbot-container">
+    <div class="assistant-chatbot-header">
+      <div class="assistant-chatbot-title">
+        <i class="fas fa-robot"></i>
+        <span class="ml-1">Smart Assistant</span>
+      </div>
+      <button id="assistant-chatbot-close" class="assistant-chatbot-close">&times;</button>
+    </div>
+    <div id="assistant-chatbot-messages" class="assistant-chatbot-messages d-flex flex-column">
+      <div class="assistant-message assistant-bot">
+        Hi, I am your assistant. I can help you use this app and schedule appointments with doctors.
+      </div>
+    </div>
+    <div class="assistant-chatbot-input-row">
+      <input type="text" id="assistant-chatbot-input" class="form-control" placeholder="Type a message">
+      <button id="assistant-chatbot-send" class="btn btn-primary">Send</button>
+    </div>
+  </div>
+
+  <button id="assistant-chatbot-toggle" class="assistant-chatbot-toggle" aria-label="Open assistant">
+    <i class="fas fa-comment-medical"></i>
+  </button>
+
+  {% block body %}
+
+  {% endblock %}
+
+
+
+
+</div>
+
+
+
+   <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+   
+    <script src="https://code.jquery.com/jquery-3.4.1.js"integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU="crossorigin="anonymous"></script> 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+ 
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        var container = document.getElementById("assistant-chatbot-container");
+        var toggle = document.getElementById("assistant-chatbot-toggle");
+        var closeButton = document.getElementById("assistant-chatbot-close");
+        var messages = document.getElementById("assistant-chatbot-messages");
+        var input = document.getElementById("assistant-chatbot-input");
+        var sendButton = document.getElementById("assistant-chatbot-send");
+
+        function getCookie(name) {
+          var cookieValue = null;
+          if (document.cookie && document.cookie !== "") {
+            var cookies = document.cookie.split(";");
+            for (var i = 0; i < cookies.length; i++) {
+              var cookie = cookies[i].trim();
+              if (cookie.substring(0, name.length + 1) === name + "=") {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+              }
+            }
+          }
+          return cookieValue;
+        }
+
+        function addMessage(sender, text) {
+          var div = document.createElement("div");
+          div.classList.add("assistant-message");
+          if (sender === "user") {
+            div.classList.add("assistant-user");
+          } else {
+            div.classList.add("assistant-bot");
+          }
+          div.textContent = text;
+          messages.appendChild(div);
+          messages.scrollTop = messages.scrollHeight;
+        }
+
+        function sendMessage() {
+          var text = input.value.trim();
+          if (!text) {
+            return;
+          }
+
+          addMessage("user", text);
+          input.value = "";
+
+          var csrftoken = getCookie("csrftoken");
+          var endpoint = "{% url 'chatbot_message' %}";
+
+          sendButton.disabled = true;
+
+          fetch(endpoint, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+              "X-CSRFToken": csrftoken
+            },
+            body: "message=" + encodeURIComponent(text)
+          })
+            .then(function (response) {
+              return response.json();
+            })
+            .then(function (data) {
+              if (data && data.reply) {
+                addMessage("bot", data.reply);
+              } else {
+                addMessage("bot", "I could not understand the response from the server.");
+              }
+            })
+            .catch(function () {
+              addMessage("bot", "There was a problem sending your message. Please try again.");
+            })
+            .finally(function () {
+              sendButton.disabled = false;
+            });
+        }
+
+        if (toggle) {
+          toggle.addEventListener("click", function () {
+            if (container.style.display === "flex") {
+              container.style.display = "none";
+            } else {
+              container.style.display = "flex";
+              input.focus();
+            }
+          });
+        }
+
+        if (closeButton) {
+          closeButton.addEventListener("click", function () {
+            container.style.display = "none";
+          });
+        }
+
+        if (sendButton) {
+          sendButton.addEventListener("click", function () {
+            sendMessage();
+          });
+        }
+
+        if (input) {
+          input.addEventListener("keypress", function (e) {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              sendMessage();
+            }
+          });
+        }
+      });
+    </script>
+
+
+</body>
+</html>

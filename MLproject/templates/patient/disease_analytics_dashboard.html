@@ -1,0 +1,688 @@
+{% extends "basic.html" %}
+{% load static %}
+
+{% block head %}
+<link rel="stylesheet" type="text/css" href="{% static 'patient/checkdisease/dps.css' %}">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js">
+<style>
+    .dashboard-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+    }
+    
+    .dashboard-header {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .dashboard-title {
+        color: #2D3436;
+        font-size: 2.5rem;
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 10px;
+        background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .dashboard-subtitle {
+        color: #6C757D;
+        text-align: center;
+        font-size: 1.1rem;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .stat-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        padding: 25px;
+        text-align: center;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+    
+    .stat-label {
+        color: #6C757D;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .stat-card.total { border-left: 5px solid #FF6B6B; }
+    .stat-card.symptoms { border-left: 5px solid #4ECDC4; }
+    .stat-card.images { border-left: 5px solid #45B7D1; }
+    .stat-card.total .stat-number { color: #FF6B6B; }
+    .stat-card.symptoms .stat-number { color: #4ECDC4; }
+    .stat-card.images .stat-number { color: #45B7D1; }
+    
+    .main-content {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 30px;
+        margin-bottom: 30px;
+    }
+    
+    .chart-section {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .chart-title {
+        color: #2D3436;
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+    
+    .top-diseases-list {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .disease-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px;
+        margin-bottom: 10px;
+        background: linear-gradient(45deg, rgba(255, 107, 107, 0.1), rgba(78, 205, 196, 0.1));
+        border-radius: 10px;
+        border-left: 4px solid #FF6B6B;
+        transition: all 0.3s ease;
+    }
+    
+    .disease-item:hover {
+        transform: translateX(5px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .disease-name {
+        font-weight: 600;
+        color: #2D3436;
+        font-size: 1rem;
+    }
+    
+    .disease-stats {
+        text-align: right;
+    }
+    
+    .disease-count {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #FF6B6B;
+    }
+    
+    .disease-percentage {
+        font-size: 0.8rem;
+        color: #6C757D;
+    }
+    
+    .image-scanner-section {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 30px;
+        margin-top: 30px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .scanner-title {
+        color: #2D3436;
+        font-size: 1.5rem;
+        font-weight: 600;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    
+    .upload-area {
+        border: 3px dashed #FF6B6B;
+        border-radius: 15px;
+        padding: 40px;
+        text-align: center;
+        background: linear-gradient(45deg, rgba(255, 107, 107, 0.05), rgba(78, 205, 196, 0.05));
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .upload-area:hover {
+        border-color: #4ECDC4;
+        background: linear-gradient(45deg, rgba(78, 205, 196, 0.1), rgba(69, 183, 209, 0.1));
+    }
+    
+    .upload-area.dragover {
+        border-color: #45B7D1;
+        background: linear-gradient(45deg, rgba(69, 183, 209, 0.2), rgba(255, 107, 107, 0.2));
+    }
+    
+    .upload-icon {
+        font-size: 3rem;
+        color: #FF6B6B;
+        margin-bottom: 15px;
+    }
+    
+    .upload-text {
+        color: #2D3436;
+        font-size: 1.1rem;
+        margin-bottom: 5px;
+    }
+    
+    .upload-hint {
+        color: #6C757D;
+        font-size: 0.9rem;
+    }
+    
+    .scan-btn {
+        background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+        color: white;
+        border: none;
+        padding: 15px 40px;
+        border-radius: 25px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+    }
+    
+    .scan-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+    }
+    
+    .scan-btn:disabled {
+        background: #6C757D;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+    
+    .recent-predictions {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 30px;
+        margin-top: 30px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .prediction-item {
+        padding: 15px;
+        margin-bottom: 10px;
+        background: linear-gradient(45deg, rgba(69, 183, 209, 0.1), rgba(78, 205, 196, 0.1));
+        border-radius: 10px;
+        border-left: 4px solid #45B7D1;
+    }
+    
+    .prediction-disease {
+        font-weight: 600;
+        color: #2D3436;
+        margin-bottom: 5px;
+    }
+    
+    .prediction-meta {
+        font-size: 0.85rem;
+        color: #6C757D;
+        display: flex;
+        justify-content: space-between;
+    }
+    
+    .loading {
+        display: none;
+        text-align: center;
+        margin: 20px 0;
+    }
+    
+    .spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #FF6B6B;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .result-container, .error-container {
+        margin-top: 20px;
+        padding: 20px;
+        border-radius: 15px;
+        display: none;
+    }
+    
+    .result-container {
+        background: linear-gradient(45deg, rgba(150, 206, 180, 0.2), rgba(78, 205, 196, 0.2));
+        border: 2px solid #96CEB4;
+    }
+    
+    .error-container {
+        background: linear-gradient(45deg, rgba(255, 118, 117, 0.2), rgba(255, 107, 107, 0.2));
+        border: 2px solid #FF7675;
+    }
+    
+    .chart-container {
+        position: relative;
+        height: 300px;
+        margin: 20px 0;
+    }
+    
+    @media (max-width: 768px) {
+        .main-content {
+            grid-template-columns: 1fr;
+        }
+        
+        .dashboard-title {
+            font-size: 2rem;
+        }
+        
+        .stats-grid {
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        }
+        
+        .upload-area {
+            padding: 20px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h1 class="dashboard-title">🏥 Disease Analytics Dashboard</h1>
+        <p class="dashboard-subtitle">Comprehensive analysis of skin disease predictions and AI-powered diagnostics</p>
+    </div>
+    
+    <!-- Statistics Overview -->
+    <div class="stats-grid">
+        <div class="stat-card total">
+            <div class="stat-number">{{ total_predictions }}</div>
+            <div class="stat-label">Total Predictions</div>
+        </div>
+        <div class="stat-card symptoms">
+            <div class="stat-number">{{ symptoms_predictions }}</div>
+            <div class="stat-label">Symptom-Based</div>
+        </div>
+        <div class="stat-card images">
+            <div class="stat-number">{{ image_predictions }}</div>
+            <div class="stat-label">Image-Based</div>
+        </div>
+    </div>
+    
+    <div class="main-content">
+        <!-- Chart Section -->
+        <div class="chart-section">
+            <h3 class="chart-title">📊 Disease Distribution Trends</h3>
+            <div class="chart-container">
+                <canvas id="monthlyChart"></canvas>
+            </div>
+        </div>
+        
+        <!-- Top Diseases List -->
+        <div class="top-diseases-list">
+            <h3 class="chart-title">🔥 Top 5 Most Frequent Diseases</h3>
+            {% for disease, stats in top_diseases %}
+            <div class="disease-item">
+                <div class="disease-name">{{ disease }}</div>
+                <div class="disease-stats">
+                    <div class="disease-count">{{ stats.count }}</div>
+                    <div class="disease-percentage">{{ stats.percentage|floatformat:1 }}%</div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="disease-item">
+                <div class="disease-name">No disease data available</div>
+                <div class="disease-stats">
+                    <div class="disease-count">0</div>
+                    <div class="disease-percentage">0%</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- Image Scanner Section -->
+    <div class="image-scanner-section">
+        <h3 class="scanner-title">📷 AI-Powered Skin Disease Scanner</h3>
+        <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 10px; padding: 15px; margin-bottom: 20px;">
+            <h4 style="color: #856404; margin-bottom: 10px;">📷 Image Requirements</h4>
+            <ul style="color: #856404; margin: 0; padding-left: 20px;">
+                <li>Upload only <strong>skin disease images</strong> (rashes, lesions, spots, etc.)</li>
+                <li>Ensure good lighting and clear visibility of the affected area</li>
+                <li>Images should show <strong>human skin</strong> with visible medical conditions</li>
+                <li><strong>Not suitable:</strong> Photos of faces, non-skin objects, animals, or other body parts</li>
+            </ul>
+        </div>
+        
+        <form id="imageUploadForm" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="upload-area" id="uploadArea">
+                <input type="file" id="skinImageInput" name="skin_image" accept="image/*" style="display: none;" required>
+                <i class="fa fa-cloud-upload upload-icon"></i>
+                <div class="upload-text">Click to upload or drag and drop</div>
+                <div class="upload-hint">Supported formats: JPG, PNG, JPEG | Max size: 10MB</div>
+            </div>
+            
+            <div id="imagePreview" style="display: none; margin-top: 20px; text-align: center;">
+                <img id="previewImg" style="max-width: 300px; max-height: 300px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);" alt="Preview">
+                <br>
+                <button type="button" onclick="removeImage()" style="margin-top: 10px; background: #dc3545; color: white; border: none; padding: 8px 20px; border-radius: 5px; cursor: pointer;">
+                    Remove Image
+                </button>
+            </div>
+            
+            <div style="text-align: center; margin-top: 20px;">
+                <button type="submit" class="scan-btn" id="scanBtn" disabled>
+                    <i class="fa fa-search"></i> Analyze Skin Image
+                </button>
+            </div>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p style="margin-top: 10px; color: #2D3436;">Analyzing image with AI...</p>
+            </div>
+        </form>
+        
+        <div class="result-container" id="resultContainer">
+            <h4 style="color: #28a745; margin-bottom: 15px;">✅ AI Analysis Results</h4>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                <div>
+                    <strong>Predicted Disease:</strong><br>
+                    <span id="predictedDisease" style="color: #FF6B6B; font-size: 1.1rem;">-</span>
+                </div>
+                <div>
+                    <strong>Confidence Score:</strong><br>
+                    <span id="confidenceScore" style="color: #4ECDC4; font-size: 1.1rem;">-</span>
+                </div>
+                <div>
+                    <strong>Recommended Doctor:</strong><br>
+                    <span id="consultDoctor" style="color: #45B7D1; font-size: 1.1rem;">-</span>
+                </div>
+            </div>
+            <div style="margin-top: 15px; text-align: center;">
+                <a href="{% url 'consult_a_doctor' %}" class="scan-btn" style="text-decoration: none; display: inline-block; margin-right: 10px;">
+                    Consult a Doctor
+                </a>
+                <a href="{% url 'disease_analytics_dashboard' %}" class="scan-btn" style="text-decoration: none; display: inline-block; background: linear-gradient(45deg, #45B7D1, #96CEB4);">
+                    View Analytics
+                </a>
+            </div>
+        </div>
+        
+        <div class="error-container" id="errorContainer">
+            <h4 style="color: #721c24; margin-bottom: 15px;">❌ Invalid Image</h4>
+            <div id="errorMessage" style="color: #721c24; margin-bottom: 15px;"></div>
+            <div style="background: #fff; padding: 15px; border-radius: 5px; margin-top: 10px;">
+                <h5 style="color: #721c24; margin-bottom: 10px;">✅ How to take a proper skin photo:</h5>
+                <ul style="color: #721c24; margin: 0; padding-left: 20px;">
+                    <li>Use good lighting (natural light is best)</li>
+                    <li>Hold camera 6-12 inches from the skin</li>
+                    <li>Ensure the affected area is clearly visible</li>
+                    <li>Take close-up photos of rashes, lesions, or spots</li>
+                    <li>Avoid photos of faces or full body shots</li>
+                    <li>Make sure the image is clear and not blurry</li>
+                </ul>
+            </div>
+            <button onclick="removeImage()" style="margin-top: 15px; background: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+                Try Again
+            </button>
+        </div>
+    </div>
+    
+    <!-- Recent Predictions -->
+    <div class="recent-predictions">
+        <h3 class="chart-title">🕒 Recent Predictions</h3>
+        {% for prediction in recent_predictions %}
+        <div class="prediction-item">
+            <div class="prediction-disease">{{ prediction.diseasename }}</div>
+            <div class="prediction-meta">
+                <span>Confidence: {{ prediction.confidence }}%</span>
+                <span>Method: {{ prediction.prediction_method|title }}</span>
+                <span>{{ prediction.id }}</span>
+            </div>
+        </div>
+        {% empty %}
+        <div class="prediction-item">
+            <div class="prediction-disease">No recent predictions</div>
+            <div class="prediction-meta">
+                <span>Start using the AI scanner to see predictions here</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Chart.js Monthly Statistics
+    document.addEventListener('DOMContentLoaded', function() {
+        const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
+        
+        // Chart data will be populated by server-side rendering
+        const monthlyLabels = [];
+        const monthlyData = [];
+        
+        {% for stat in monthly_stats %}
+        monthlyLabels.push("{{ stat.month }}");
+        monthlyData.push({{ stat.count }});
+        {% endfor %}
+        
+        const monthlyChart = new Chart(monthlyCtx, {
+            type: 'line',
+            data: {
+                labels: monthlyLabels,
+                datasets: [{
+                    label: 'Monthly Predictions',
+                    data: monthlyData,
+                    borderColor: '#FF6B6B',
+                    backgroundColor: 'rgba(255, 107, 107, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    }
+                },
+                x: {
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    }
+                }
+            }
+        }
+    });
+    
+    // Image Upload Functionality
+    const uploadArea = document.getElementById('uploadArea');
+    const imageInput = document.getElementById('skinImageInput');
+    const imagePreview = document.getElementById('imagePreview');
+    const previewImg = document.getElementById('previewImg');
+    const scanBtn = document.getElementById('scanBtn');
+    const form = document.getElementById('imageUploadForm');
+    const loading = document.getElementById('loading');
+    const resultContainer = document.getElementById('resultContainer');
+    const errorContainer = document.getElementById('errorContainer');
+    const errorMessage = document.getElementById('errorMessage');
+
+    // Click to upload
+    uploadArea.addEventListener('click', () => {
+        imageInput.click();
+    });
+
+    // Drag and drop
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            imageInput.files = files;
+            handleImageSelect(files[0]);
+        }
+    });
+
+    // File input change
+    imageInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            handleImageSelect(e.target.files[0]);
+        }
+    });
+
+    function handleImageSelect(file) {
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+            alert('Please select a valid image file');
+            return;
+        }
+
+        // Validate file size (10MB)
+        if (file.size > 10 * 1024 * 1024) {
+            alert('File size must be less than 10MB');
+            return;
+        }
+
+        // Show preview
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            previewImg.src = e.target.result;
+            imagePreview.style.display = 'block';
+            scanBtn.disabled = false;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function removeImage() {
+        imageInput.value = '';
+        imagePreview.style.display = 'none';
+        scanBtn.disabled = true;
+        resultContainer.style.display = 'none';
+        errorContainer.style.display = 'none';
+        errorMessage.textContent = '';
+    }
+
+    // Form submission
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        if (!imageInput.files.length) {
+            alert('Please select an image first');
+            return;
+        }
+
+        const formData = new FormData(form);
+        
+        // Show loading
+        loading.style.display = 'block';
+        resultContainer.style.display = 'none';
+        errorContainer.style.display = 'none';
+        scanBtn.disabled = true;
+
+        try {
+            const response = await fetch('{% url "scan_image" %}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                }
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                // Show results
+                document.getElementById('predictedDisease').textContent = data.predicteddisease || 'Unknown';
+                document.getElementById('confidenceScore').textContent = (data.confidencescore || '0') + '%';
+                document.getElementById('consultDoctor').textContent = data.consultdoctor || 'Dermatologist';
+                resultContainer.style.display = 'block';
+                
+                // Refresh the page to update analytics
+                setTimeout(() => {
+                    window.location.reload();
+                }, 3000);
+            } else {
+                // Handle image validation errors
+                if (data.error === 'Invalid Image' && data.message) {
+                    errorMessage.textContent = data.message;
+                    errorContainer.style.display = 'block';
+                } else {
+                    alert('Error: ' + (data.error || data.message || 'Prediction failed'));
+                }
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again.');
+        } finally {
+            loading.style.display = 'none';
+            scanBtn.disabled = false;
+        }
+    });
+</script>
+{% endblock %}
+

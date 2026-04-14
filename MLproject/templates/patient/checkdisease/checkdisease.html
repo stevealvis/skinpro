@@ -1,0 +1,882 @@
+{% extends "basic.html" %}
+{% load static %}
+
+{% block head %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'patient/checkdisease/dps.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<style>
+  .main-container {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.9));
+    backdrop-filter: blur(20px);
+    border-radius: 25px;
+    padding: 50px;
+    margin: 40px 0;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+  }
+
+  .page-title {
+    background: linear-gradient(45deg, #8E44AD, #E67E22, #3498DB);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 30px;
+    text-align: center;
+  }
+
+  .page-description {
+    font-size: 1.2rem;
+    color: #555;
+    text-align: center;
+    margin-bottom: 40px;
+    line-height: 1.6;
+  }
+
+  /* Enhanced Tab System */
+  .tab-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 40px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 25px;
+    padding: 8px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  }
+
+  .tab-btn {
+    background: transparent;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    color: #666;
+    cursor: pointer;
+    margin: 0 5px;
+  }
+
+  .tab-btn.active {
+    background: linear-gradient(45deg, #8E44AD, #E67E22);
+    color: white;
+    box-shadow: 0 8px 25px rgba(142, 68, 173, 0.3);
+    transform: translateY(-2px);
+  }
+
+  .tab-btn:hover:not(.active) {
+    background: rgba(142, 68, 173, 0.1);
+    color: #8E44AD;
+  }
+
+  /* Symptom Selection Enhancement */
+  .symptom-section {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.8));
+    backdrop-filter: blur(15px);
+    border-radius: 20px;
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+  }
+
+  .add-symptom-btn {
+    background: linear-gradient(45deg, #8E44AD, #E67E22);
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 25px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 25px rgba(142, 68, 173, 0.3);
+    width: 100%;
+    margin-bottom: 20px;
+  }
+
+  .add-symptom-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 35px rgba(142, 68, 173, 0.4);
+    background: linear-gradient(45deg, #7D3C98, #CA6F1E);
+  }
+
+  .dropdown-container {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border: 2px solid #FFB3B3;
+    transition: all 0.3s ease;
+  }
+
+  .dropdown-container.show {
+    border-color: #8E44AD;
+    box-shadow: 0 0 20px rgba(142, 68, 173, 0.2);
+  }
+
+  .search-bar {
+    width: 100%;
+    padding: 15px 20px;
+    border: 2px solid #BB8FCE;
+    border-radius: 25px;
+    font-size: 1rem;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+  }
+
+  .search-bar:focus {
+    outline: none;
+    border-color: #8E44AD;
+    box-shadow: 0 0 20px rgba(142, 68, 173, 0.2);
+  }
+
+  .symptom-item {
+    background: linear-gradient(135deg, #BB8FCE, #F5B041);
+    color: #333;
+    padding: 10px 20px;
+    margin: 5px;
+    border-radius: 20px;
+    display: inline-block;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+  }
+
+  .symptom-item:hover {
+    background: linear-gradient(45deg, #8E44AD, #E67E22);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(142, 68, 173, 0.3);
+  }
+
+  /* Symptom List Display */
+  .symptom-list {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 15px;
+    padding: 20px;
+    margin-top: 20px;
+    min-height: 120px;
+  }
+
+  .symptom-tag {
+    background: linear-gradient(45deg, #8E44AD, #E67E22);
+    color: white;
+    padding: 10px 15px;
+    margin: 5px;
+    border-radius: 20px;
+    display: inline-block;
+    position: relative;
+    transition: all 0.3s ease;
+  }
+
+  .symptom-tag:hover {
+    transform: scale(1.05);
+  }
+
+  .symptom-tag .remove-btn {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: rgba(255, 255, 255, 0.9);
+    color: #8E44AD;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+
+  /* Image Upload Enhancement */
+  .upload-area {
+    border: 3px dashed #BB8FCE;
+    border-radius: 20px;
+    padding: 60px 40px;
+    text-align: center;
+    background: linear-gradient(135deg, rgba(187, 143, 206, 0.1), rgba(245, 176, 65, 0.1));
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+  }
+
+  .upload-area:hover {
+    border-color: #8E44AD;
+    background: linear-gradient(135deg, rgba(187, 143, 206, 0.2), rgba(245, 176, 65, 0.2));
+    transform: translateY(-2px);
+  }
+
+  .upload-area.dragover {
+    border-color: #E67E22;
+    background: linear-gradient(135deg, rgba(230, 126, 34, 0.2), rgba(52, 152, 219, 0.2));
+  }
+
+  .upload-icon {
+    font-size: 64px;
+    background: linear-gradient(45deg, #8E44AD, #E67E22);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 20px;
+  }
+
+  .upload-text {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 10px;
+  }
+
+  .upload-hint {
+    color: #666;
+    font-size: 0.9rem;
+  }
+
+  /* Image Preview */
+  .image-preview {
+    position: relative;
+    display: inline-block;
+    margin: 20px 0;
+  }
+
+  .image-preview img {
+    max-width: 100%;
+    max-height: 300px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    border: 3px solid #FFB3B3;
+  }
+
+  .remove-image-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: linear-gradient(45deg, #8E44AD, #7D3C98);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .remove-image-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 5px 15px rgba(142, 68, 173, 0.4);
+  }
+
+  /* Action Buttons */
+  .action-btn {
+    background: linear-gradient(45deg, #8E44AD, #E67E22);
+    color: white;
+    border: none;
+    padding: 15px 40px;
+    border-radius: 25px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 25px rgba(142, 68, 173, 0.3);
+    cursor: pointer;
+  }
+
+  .action-btn:hover:not(:disabled) {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 35px rgba(142, 68, 173, 0.4);
+  }
+
+  .action-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* Results Section */
+  .results-container {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.9));
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    padding: 40px;
+    margin-top: 30px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    animation: slideInUp 0.8s ease-out;
+  }
+
+  .disease-title {
+    background: linear-gradient(45deg, #8E44AD, #E67E22);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: 2rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 30px;
+  }
+
+  .confidence-section {
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 15px;
+    padding: 25px;
+    margin: 20px 0;
+    text-align: center;
+  }
+
+  .progress-container {
+    background: #f0f0f0;
+    border-radius: 25px;
+    height: 30px;
+    margin: 20px 0;
+    overflow: hidden;
+  }
+
+  .progress-bar {
+    background: linear-gradient(45deg, #8E44AD, #E67E22, #3498DB);
+    height: 100%;
+    border-radius: 25px;
+    transition: width 1s ease-in-out;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+  }
+
+  .info-section {
+    background: rgba(255, 234, 167, 0.3);
+    border: 2px solid #FFEAA7;
+    border-radius: 15px;
+    padding: 20px;
+    margin: 20px 0;
+  }
+
+  .info-section h4 {
+    color: #856404;
+    margin-bottom: 10px;
+  }
+
+  .info-section p {
+    color: #856404;
+    margin: 0;
+    line-height: 1.6;
+  }
+
+  /* Loading Animation */
+  .loading-container {
+    text-align: center;
+    padding: 40px;
+  }
+
+    .spinner {
+    border: 4px solid rgba(142, 68, 173, 0.1);
+    border-left: 4px solid #8E44AD;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  @keyframes slideInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .main-container {
+      padding: 30px 20px;
+      margin: 20px;
+    }
+    
+    .page-title {
+      font-size: 2rem;
+    }
+    
+    .tab-container {
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .tab-btn {
+      width: 100%;
+      margin: 0;
+    }
+    
+    .symptom-item {
+      font-size: 0.9rem;
+      padding: 8px 15px;
+    }
+  }
+
+  @media (max-width: 576px) {
+    .main-container {
+      padding: 20px 15px;
+    }
+    
+    .page-title {
+      font-size: 1.5rem;
+    }
+    
+    .upload-area {
+      padding: 40px 20px;
+    }
+    
+    .upload-icon {
+      font-size: 48px;
+    }
+  }
+</style>
+
+{% endblock %}
+
+{% block body %}
+
+<div class="container">
+  <div class="main-container">
+    <h1 class="page-title">
+      <i class="fa fa-stethoscope"></i> Disease Detection & Analysis
+    </h1>
+    <p class="page-description">
+      Get AI-powered analysis of your symptoms or skin images. Our advanced system helps identify 
+      possible conditions and recommends appropriate medical consultation.
+    </p>
+
+    <!-- Tab Navigation -->
+    <div class="tab-container">
+      <button type="button" class="tab-btn active" id="symptomsTab" onclick="showSymptomsTab()">
+        <i class="fa fa-list"></i> Check by Symptoms
+      </button>
+      <button type="button" class="tab-btn" id="imageTab" onclick="showImageTab()">
+        <i class="fa fa-camera"></i> Scan Image
+      </button>
+    </div>
+
+    <!-- Symptoms Section -->
+    <div id="symptomsSection">
+      <div class="symptom-section">
+        <button onclick="Functionshow()" class="add-symptom-btn">
+          <i class="fa fa-plus"></i> Add Symptoms
+        </button>
+
+        <div id="myDropdown" class="dropdown-container" style="display: none;">
+          <input id="searchbar" class="search-bar" onkeyup="search_symptoms()" type="text"
+                 name="search" placeholder="🔍 Search symptoms...">
+          
+          <div id="container-dropdown" style="max-height: 300px; overflow-y: auto;">
+            {% for i in list2 %}
+            <a class="symptom-item" onclick="Functionsymptoms(this.textContent)">{{i}}</a>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="symptom-list">
+          <div class="card-header" style="background: linear-gradient(45deg, #FF6B6B, #4ECDC4); color: white; border-radius: 10px 10px 0 0;">
+            <h5 style="margin: 0;"><i class="fa fa-list"></i> Selected Symptoms</h5>
+          </div>
+          <div class="card-body" id="sympbox" style="min-height: 80px;">
+            <p style="color: #999; text-align: center; margin: 20px 0;">
+              No symptoms selected yet. Click "Add Symptoms" to get started.
+            </p>
+          </div>
+          <div class="card-footer" style="background: rgba(255, 255, 255, 0.8); border-radius: 0 0 10px 10px;">
+            <button id="predict" class="action-btn" style="width: 100%;">
+              <i class="fa fa-search"></i> Predict Disease
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Image Section -->
+    <div id="imageSection" style="display: none;">
+      <div class="symptom-section">
+        <div class="card">
+          <div class="card-header text-center" style="background: linear-gradient(45deg, #FF6B6B, #4ECDC4); color: white;">
+            <h5><i class="fa fa-camera"></i> Upload Skin Image for AI Analysis</h5>
+          </div>
+          <div class="card-body">
+            <form id="imageUploadForm" enctype="multipart/form-data">
+              {% csrf_token %}
+              
+              <div class="upload-area" id="uploadArea">
+                <input type="file" id="skinImageInput" name="skin_image" accept="image/*" style="display: none;" required>
+                <i class="fa fa-cloud-upload upload-icon"></i>
+                <h5 class="upload-text">Click to upload or drag and drop</h5>
+                <p class="upload-hint">Supported: JPG, PNG, JPEG (Max 10MB)</p>
+              </div>
+              
+              <div id="imagePreview" style="display: none; text-align: center;">
+                <div class="image-preview">
+                  <img id="previewImg" alt="Preview">
+                  <button type="button" onclick="removeImage()" class="remove-image-btn">
+                    <i class="fa fa-times"></i>
+                  </button>
+                </div>
+              </div>
+              
+              <div class="text-center" style="margin-top: 30px;">
+                <button type="submit" class="action-btn" id="scanBtn" disabled>
+                  <i class="fa fa-search"></i> Analyze Image
+                </button>
+              </div>
+              
+              <div class="loading-container" id="imageLoading" style="display: none;">
+                <div class="spinner"></div>
+                <h5>Analyzing your image...</h5>
+                <p style="color: #666;">This may take a few moments</p>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results Section -->
+  <div id="resultdiv" style="display: none;">
+    <div class="results-container">
+      <div class="text-center mb-4">
+        <div class="card" style="background: rgba(255, 255, 255, 0.9); border: none; border-radius: 15px;">
+          <div class="card-body">
+            <div style="margin-bottom: 20px;">
+              <span style="color: #666; font-weight: 600;">Patient: {{ user.patient.name }}</span>
+              <span style="color: #666; font-weight: 600;"> | Age: {{ user.patient.age }}</span>
+            </div>
+            <h3 style="color: #333; margin-bottom: 20px;">Predicted Disease:</h3>
+            <h2 class="disease-title" id="diseasefield"></h2>
+            
+            <div class="confidence-section">
+              <h5 style="color: #333; margin-bottom: 15px;">
+                <i class="fa fa-chart-line"></i> Confidence Score
+              </h5>
+              <div class="progress-container">
+                <div id="percentage" class="progress-bar" style="width: 0%">0%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="text-center mt-4 mb-4">
+        <a id="href" href="#" target="_blank" rel="noopener noreferrer" class="action-btn" style="text-decoration: none; display: inline-block;">
+          <i class="fa fa-info-circle"></i> Learn More About <span id="diseasesearch"></span>
+        </a>
+      </div>
+
+      <div class="info-section">
+        <h4><i class="fa fa-exclamation-triangle"></i> Important Disclaimer</h4>
+        <p>
+          This tool does not provide medical advice. It is intended for informational purposes only 
+          and is not a substitute for professional medical advice, diagnosis, or treatment. 
+          Always consult with a qualified healthcare provider for medical concerns.
+        </p>
+      </div>
+
+      <div class="text-center" style="margin-top: 30px;">
+        <form action="consult_a_doctor" method="GET" style="display: inline-block;">
+          {% csrf_token %}
+          <button id="consultbtn" type="submit" class="action-btn" style="background: linear-gradient(45deg, #4ECDC4, #45B7D1);">
+            <i class="fa fa-user-md"></i> Consult a <span id="consultdoctor">Doctor</span>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- JavaScript -->
+<script>
+// Tab switching functions
+function showSymptomsTab() {
+  document.getElementById('symptomsSection').style.display = 'block';
+  document.getElementById('imageSection').style.display = 'none';
+  document.getElementById('symptomsTab').classList.add('active');
+  document.getElementById('imageTab').classList.remove('active');
+  document.getElementById('resultdiv').style.display = 'none';
+}
+
+function showImageTab() {
+  document.getElementById('symptomsSection').style.display = 'none';
+  document.getElementById('imageSection').style.display = 'block';
+  document.getElementById('imageTab').classList.add('active');
+  document.getElementById('symptomsTab').classList.remove('active');
+  document.getElementById('resultdiv').style.display = 'none';
+}
+
+// Symptom functions
+function Functionshow() {
+  document.getElementById('searchbar').value = '';
+  document.getElementById('myDropdown').classList.toggle('show');
+  document.getElementById('myDropdown').style.display = 
+    document.getElementById('myDropdown').style.display === 'none' ? 'block' : 'none';
+  search_symptoms();
+}
+
+function Functionsymptoms(name) {
+  // Remove placeholder text if exists
+  const sympbox = document.getElementById('sympbox');
+  const placeholder = sympbox.querySelector('p');
+  if (placeholder) {
+    placeholder.remove();
+  }
+
+  // Check if symptom already exists
+  const existingSymptoms = sympbox.querySelectorAll('.symptom-tag');
+  for (let symptom of existingSymptoms) {
+    if (symptom.textContent.trim() === name) {
+      alert('This symptom is already added!');
+      return;
+    }
+  }
+
+  // Create new symptom tag
+  const symptomDiv = document.createElement('div');
+  symptomDiv.className = 'symptom-tag';
+  symptomDiv.innerHTML = `
+    ${name}
+    <button type="button" class="remove-btn" onclick="removeSymptom(this)">×</button>
+  `;
+  
+  sympbox.appendChild(symptomDiv);
+  document.getElementById('myDropdown').style.display = 'none';
+}
+
+function removeSymptom(button) {
+  button.parentElement.remove();
+  
+  // Show placeholder if no symptoms
+  const sympbox = document.getElementById('sympbox');
+  if (sympbox.children.length === 0) {
+    sympbox.innerHTML = '<p style="color: #999; text-align: center; margin: 20px 0;">No symptoms selected yet. Click "Add Symptoms" to get started.</p>';
+  }
+}
+
+function search_symptoms() {
+  let input = document.getElementById('searchbar').value.toLowerCase();
+  let x = document.getElementsByClassName('symptom-item');
+  
+  for (i = 0; i < x.length; i++) {
+    if (!x[i].innerHTML.toLowerCase().includes(input)) {
+      x[i].style.display = 'none';
+    } else {
+      x[i].style.display = 'inline-block';
+    }
+  }
+}
+
+// Image upload functionality
+const uploadArea = document.getElementById('uploadArea');
+const imageInput = document.getElementById('skinImageInput');
+const imagePreview = document.getElementById('imagePreview');
+const previewImg = document.getElementById('previewImg');
+const scanBtn = document.getElementById('scanBtn');
+
+// Click to upload
+if (uploadArea) {
+  uploadArea.addEventListener('click', () => {
+    imageInput.click();
+  });
+
+  // Drag and drop
+  uploadArea.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadArea.classList.add('dragover');
+  });
+
+  uploadArea.addEventListener('dragleave', () => {
+    uploadArea.classList.remove('dragover');
+  });
+
+  uploadArea.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadArea.classList.remove('dragover');
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      imageInput.files = files;
+      handleImageSelect(files[0]);
+    }
+  });
+}
+
+// File input change
+if (imageInput) {
+  imageInput.addEventListener('change', (e) => {
+    if (e.target.files.length > 0) {
+      handleImageSelect(e.target.files[0]);
+    }
+  });
+}
+
+function handleImageSelect(file) {
+  // Validate file type
+  if (!file.type.startsWith('image/')) {
+    alert('Please select a valid image file');
+    return;
+  }
+
+  // Validate file size (10MB)
+  if (file.size > 10 * 1024 * 1024) {
+    alert('File size must be less than 10MB');
+    return;
+  }
+
+  // Show preview
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    previewImg.src = e.target.result;
+    imagePreview.style.display = 'block';
+    scanBtn.disabled = false;
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeImage() {
+  const imageInput = document.getElementById('skinImageInput');
+  const imagePreview = document.getElementById('imagePreview');
+  const scanBtn = document.getElementById('scanBtn');
+  if (imageInput) imageInput.value = '';
+  if (imagePreview) imagePreview.style.display = 'none';
+  if (scanBtn) scanBtn.disabled = true;
+}
+
+$(document).ready(function() {
+  // Image form submission
+  const imageForm = document.getElementById('imageUploadForm');
+  if (imageForm) {
+    imageForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const imageInput = document.getElementById('skinImageInput');
+      if (!imageInput.files.length) {
+        alert('Please select an image first');
+        return;
+      }
+
+      const formData = new FormData(imageForm);
+      const imageLoading = document.getElementById('imageLoading');
+      const scanBtn = document.getElementById('scanBtn');
+      
+      // Show loading
+      imageLoading.style.display = 'block';
+      scanBtn.disabled = true;
+      document.getElementById('resultdiv').style.display = 'none';
+
+      try {
+        const response = await fetch('{% url "scan_image" %}', {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+          }
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          // Show results
+          document.getElementById('diseasefield').innerText = data.predicteddisease || 'Unknown';
+          document.getElementById('percentage').innerText = (data.confidencescore || '0') + "%";
+          var percent = parseFloat(data.confidencescore || 0);
+          var disease = data.predicteddisease || '';
+          
+          $('#percentage').css('width', percent + "%");
+          document.getElementById('diseasesearch').innerText = disease;
+          $("#href").attr("href", "https://www.google.com/search?q=" + disease);
+          document.getElementById('consultdoctor').innerText = data.consultdoctor || 'Dermatologist';
+          
+          // Show result div
+          $("#resultdiv").show("slow");
+          $('html,body').animate({
+            scrollTop: $("#resultdiv").offset().top},
+            'slow');
+        } else {
+          alert('Error: ' + (data.error || 'Prediction failed'));
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+      } finally {
+        imageLoading.style.display = 'none';
+        scanBtn.disabled = false;
+      }
+    });
+  }
+
+  // Symptoms prediction
+  $("#predict").click(function () {
+    event.preventDefault();
+
+    var symptoms = document.getElementsByClassName("symptom-tag");
+    var noofsym = symptoms.length;
+    var symlist = [];
+
+    if (noofsym == 0) {
+      alert("Please add some symptoms");
+      return;
+    }
+
+    for (i = 0; i < symptoms.length; i++) {
+      symlist[i] = symptoms[i].childNodes[0].nodeValue.trim();
+    }
+
+    $("#resultdiv").show("slow");
+    $('html,body').animate({
+      scrollTop: $("#resultdiv").offset().top},
+      'slow');
+
+    $.ajax({
+      url: 'checkdisease',
+      type: "POST",
+      data: {
+        "noofsym": noofsym,
+        "symptoms": symlist,
+        csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+      },
+      dataType: 'json',
+      success: function (data) {
+        document.getElementById('diseasefield').innerText = data["predicteddisease"];
+        document.getElementById('percentage').innerText = data["confidencescore"] + "%";
+        percent = data["confidencescore"];
+        disease = data["predicteddisease"];
+
+        $('#percentage').css('width', percent + "%");
+        document.getElementById('diseasesearch').innerText = data["predicteddisease"];
+        $("#href").attr("href", "https://www.google.com/search?q=" + disease);
+        document.getElementById('consultdoctor').innerText = data["consultdoctor"];
+      }
+    });
+  });
+
+  // Close dropdown when clicking outside
+  window.onclick = function(event) {
+    if (!event.target.matches('.btn') && !event.target.matches('.searchbardiv') && !event.target.matches('.searchbar')) {
+      var dropdowns = document.getElementsByClassName("drop-content");
+      var i;
+      for (i = 0; i < dropdowns.length; i++) {
+        var openDropdown = dropdowns[i];
+        if (openDropdown.classList.contains('show')) {
+          openDropdown.classList.remove('show');
+        }
+      }
+    }
+  };
+});
+</script>
+
+{% endblock %}

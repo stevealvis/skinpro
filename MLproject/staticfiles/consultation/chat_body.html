@@ -1,0 +1,32 @@
+﻿{% load static %}
+
+{% for obj in chat %}
+<div class="chat-message {% if obj.sender == request.user %}sent{% else %}received{% endif %}">
+    {% if obj.sender != request.user %}
+    <div class="message-avatar">
+        <img src="{% static 'homepage/patient.png' %}" alt="{{ obj.sender.username }}" class="avatar-img">
+    </div>
+    {% endif %}
+    
+    <div class="message-bubble {% if obj.sender == request.user %}message-sent{% else %}message-received{% endif %}">
+        <div class="message-content">
+            <div class="message-text">{{ obj.message }}</div>
+            <div class="message-meta">
+                <span class="message-sender">{{ obj.sender.username }}</span>
+                <span class="message-time">{{ obj.created|date:"H:i" }}</span>
+            </div>
+        </div>
+    </div>
+    
+    {% if obj.sender == request.user %}
+    <div class="message-avatar">
+        <img src="{% static 'homepage/doctor.png' %}" alt="{{ obj.sender.username }}" class="avatar-img">
+    </div>
+    {% endif %}
+</div>
+{% empty %}
+<div class="no-messages">
+    <i class="fas fa-comments"></i>
+    <p>No messages yet! Start the conversation.</p>
+</div>
+{% endfor %}

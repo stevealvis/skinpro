@@ -1,0 +1,802 @@
+{% extends "basic.html" %}
+{% load static %}
+
+{% block head %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<link href="{% static 'css/modern-styles.css' %}" rel="stylesheet">
+<style>
+/* Enhanced Doctor View Profile Styles */
+.doctor-profile-page {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 2rem 0;
+}
+
+.profile-header {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.profile-header h1 {
+    background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.profile-subtitle {
+    color: #666;
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+}
+
+.profile-image-container {
+    margin: 1rem 0;
+}
+
+.profile-image {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 5px solid #fff;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    object-fit: cover;
+}
+
+.profile-stats {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin: 1.5rem 0;
+    flex-wrap: wrap;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #FF6B6B;
+    display: block;
+}
+
+.stat-label {
+    color: #666;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.main-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.profile-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.card-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    background: linear-gradient(45deg, #4ECDC4, #45B7D1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.info-grid {
+    display: grid;
+    gap: 1rem;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.info-item:hover {
+    transform: translateX(5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.info-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    margin-right: 1rem;
+    font-size: 1.1rem;
+}
+
+.info-content {
+    flex: 1;
+}
+
+.info-label {
+    font-size: 0.8rem;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.25rem;
+}
+
+.info-value {
+    font-size: 1rem;
+    color: #333;
+    font-weight: 500;
+}
+
+.rating-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.rating-display {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.rating-number {
+    font-size: 3rem;
+    font-weight: 700;
+    background: linear-gradient(45deg, #FFEAA7, #FFC107);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.rating-stars {
+    font-size: 1.5rem;
+    color: #FFC107;
+    margin: 0.5rem 0;
+}
+
+.rating-text {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.btn-modern {
+    background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+    border: none;
+    border-radius: 12px;
+    padding: 0.75rem 1.5rem;
+    color: white;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+}
+
+.btn-modern:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+    color: white;
+    text-decoration: none;
+}
+
+.btn-secondary {
+    background: linear-gradient(45deg, #45B7D1, #96CEB4);
+    box-shadow: 0 4px 15px rgba(69, 183, 209, 0.3);
+}
+
+.btn-secondary:hover {
+    box-shadow: 0 8px 25px rgba(69, 183, 209, 0.4);
+}
+
+.reviews-section {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.reviews-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.reviews-title {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(45deg, #4ECDC4, #45B7D1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.reviews-subtitle {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.reviews-table {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.reviews-table table {
+    margin: 0;
+}
+
+.reviews-table thead th {
+    background: linear-gradient(45deg, #4ECDC4, #45B7D1);
+    color: white;
+    border: none;
+    padding: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.reviews-table tbody tr {
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.reviews-table tbody tr:hover {
+    background: rgba(69, 183, 209, 0.1);
+    transform: scale(1.01);
+}
+
+.reviews-table td {
+    padding: 1rem;
+    border: none;
+    vertical-align: middle;
+}
+
+.rating-badge {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-align: center;
+    min-width: 80px;
+}
+
+.rating-excellent {
+    background: linear-gradient(45deg, #4CAF50, #8BC34A);
+    color: white;
+}
+
+.rating-good {
+    background: linear-gradient(45deg, #2196F3, #03A9F4);
+    color: white;
+}
+
+.rating-average {
+    background: linear-gradient(45deg, #FF9800, #FFC107);
+    color: white;
+}
+
+.rating-poor {
+    background: linear-gradient(45deg, #F44336, #FF5722);
+    color: white;
+}
+
+.no-reviews {
+    text-align: center;
+    padding: 3rem;
+    color: #666;
+}
+
+.no-reviews i {
+    font-size: 3rem;
+    color: #ddd;
+    margin-bottom: 1rem;
+}
+
+.no-reviews p {
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .main-content {
+        grid-template-columns: 1fr;
+    }
+    
+    .profile-stats {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
+    
+    .profile-header h1 {
+        font-size: 2rem;
+    }
+    
+    .rating-number {
+        font-size: 2.5rem;
+    }
+}
+
+/* Edit Form Styles */
+.edit-form {
+    display: none;
+    margin-top: 1rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-control {
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 0.75rem;
+    width: 100%;
+    transition: border-color 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #4ECDC4;
+    box-shadow: 0 0 0 0.2rem rgba(69, 183, 209, 0.25);
+    outline: none;
+}
+
+.form-label {
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+/* Animation classes */
+.fade-in-up {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="doctor-profile-page">
+    <div class="container">
+        <!-- Profile Header -->
+        <div class="profile-header fade-in-up">
+            <h1><i class="fas fa-user-md"></i> Dr. {{ duser.doctor.name }}</h1>
+            <p class="profile-subtitle">{{ duser.doctor.specialization }} • {{ duser.doctor.qualification }}</p>
+            
+            <div class="profile-image-container">
+                <img src="{% static 'homepage/doctor.PNG' %}" alt="Doctor Profile" class="profile-image">
+            </div>
+            
+            <div class="profile-stats">
+                <div class="stat-item">
+                    <span class="stat-number">{{ duser.doctor.rating }}/5</span>
+                    <span class="stat-label">Rating</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">{{ rate|length }}</span>
+                    <span class="stat-label">Reviews</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">{{ duser.doctor.user_id }}</span>
+                    <span class="stat-label">Doctor ID</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Personal Information -->
+            <div class="profile-card fade-in-up">
+                <h3 class="card-title"><i class="fas fa-id-card"></i> Personal Information</h3>
+                
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-icon"><i class="fas fa-user"></i></div>
+                        <div class="info-content">
+                            <div class="info-label">Username</div>
+                            <div class="info-value">{{ duser.username }}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-item">
+                        <div class="info-icon"><i class="fas fa-envelope"></i></div>
+                        <div class="info-content">
+                            <div class="info-label">Email</div>
+                            <div class="info-value">{{ duser.email }}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-item">
+                        <div class="info-icon"><i class="fas fa-birthday-cake"></i></div>
+                        <div class="info-content">
+                            <div class="info-label">Date of Birth</div>
+                            <div class="info-value">{{ duser.doctor.dob|date:"F d, Y" }}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-item">
+                        <div class="info-icon"><i class="fas fa-map-marker-alt"></i></div>
+                        <div class="info-content">
+                            <div class="info-label">Address</div>
+                            <div class="info-value">{{ duser.doctor.address }}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-item">
+                        <div class="info-icon"><i class="fas fa-phone"></i></div>
+                        <div class="info-content">
+                            <div class="info-label">Mobile Number</div>
+                            <div class="info-value">{{ duser.doctor.mobile_no }}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-item">
+                        <div class="info-icon"><i class="fas fa-venus-mars"></i></div>
+                        <div class="info-content">
+                            <div class="info-label">Gender</div>
+                            <div class="info-value">{{ duser.doctor.gender }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Professional Information -->
+            <div class="profile-card fade-in-up">
+                <h3 class="card-title"><i class="fas fa-stethoscope"></i> Professional Information</h3>
+                
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-icon"><i class="fas fa-certificate"></i></div>
+                        <div class="info-content">
+                            <div class="info-label">Registration Number</div>
+                            <div class="info-value">{{ duser.doctor.registration_no }}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-item">
+                        <div class="info-icon"><i class="fas fa-calendar-alt"></i></div>
+                        <div class="info-content">
+                            <div class="info-label">Year of Registration</div>
+                            <div class="info-value">{{ duser.doctor.year_of_registration|date:"Y" }}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-item">
+                        <div class="info-icon"><i class="fas fa-graduation-cap"></i></div>
+                        <div class="info-content">
+                            <div class="info-label">Qualification</div>
+                            <div class="info-value">{{ duser.doctor.qualification }}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-item">
+                        <div class="info-icon"><i class="fas fa-hospital"></i></div>
+                        <div class="info-content">
+                            <div class="info-label">State Medical Council</div>
+                            <div class="info-value">{{ duser.doctor.State_Medical_Council }}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-item">
+                        <div class="info-icon"><i class="fas fa-user-md"></i></div>
+                        <div class="info-content">
+                            <div class="info-label">Specialization</div>
+                            <div class="info-value">{{ duser.doctor.specialization }}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-item">
+                        <div class="info-icon"><i class="fas fa-star"></i></div>
+                        <div class="info-content">
+                            <div class="info-label">Current Rating</div>
+                            <div class="info-value">
+                                <span class="rating-badge 
+                                    {% if duser.doctor.rating >= 4 %}rating-excellent
+                                    {% elif duser.doctor.rating >= 3 %}rating-good
+                                    {% elif duser.doctor.rating >= 2 %}rating-average
+                                    {% else %}rating-poor{% endif %}">
+                                    {{ duser.doctor.rating }}/5
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="profile-card fade-in-up">
+            <div class="action-buttons">
+                {% if request.user.doctor %}
+                    <a href="#" class="btn-modern" onclick="toggleEdit()">
+                        <i class="fas fa-edit"></i> Edit Profile
+                    </a>
+                    <button type="button" class="btn-modern btn-secondary" onclick="saveProfile()" id="saveBtn" style="display: none;">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                {% endif %}
+                <a href="{% url 'dviewprofile' duser.username %}" class="btn-modern btn-secondary">
+                    <i class="fas fa-refresh"></i> Refresh
+                </a>
+            </div>
+        </div>
+
+        <!-- Reviews Section -->
+        <div class="reviews-section fade-in-up">
+            <div class="reviews-header">
+                <h2 class="reviews-title"><i class="fas fa-comments"></i> Patient Reviews</h2>
+                <p class="reviews-subtitle">What patients are saying about Dr. {{ duser.doctor.name }}</p>
+            </div>
+
+            {% if rate %}
+                <div class="reviews-table">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th><i class="fas fa-user"></i> Patient Name</th>
+                                <th><i class="fas fa-star"></i> Rating</th>
+                                <th><i class="fas fa-comment"></i> Review</th>
+                                <th><i class="fas fa-calendar"></i> Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for review in rate %}
+                            <tr>
+                                <td><strong>{{ review.patient.name }}</strong></td>
+                                <td>
+                                    <span class="rating-badge 
+                                        {% if review.rating >= 4 %}rating-excellent
+                                        {% elif review.rating >= 3 %}rating-good
+                                        {% elif review.rating >= 2 %}rating-average
+                                        {% else %}rating-poor{% endif %}">
+                                        {{ review.rating }}/5
+                                    </span>
+                                </td>
+                                <td>{{ review.review|truncatechars:100 }}</td>
+                                <td><small class="text-muted">{{ review.id|default:"" }}</small></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="no-reviews">
+                    <i class="fas fa-comment-slash"></i>
+                    <p>No reviews yet. Be the first to review Dr. {{ duser.doctor.name }}!</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Edit Form Modal (Hidden by default) -->
+<div id="editModal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(45deg, #4ECDC4, #45B7D1); color: white;">
+                <h5 class="modal-title">
+                    <i class="fas fa-edit"></i> Edit Profile
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" style="color: white;">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="profileForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Name</label>
+                                <input type="text" class="form-control" value="{{ duser.doctor.name }}" id="edit_name">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Gender</label>
+                                <select class="form-control" id="edit_gender">
+                                    <option value="Male" {% if duser.doctor.gender == "Male" %}selected{% endif %}>Male</option>
+                                    <option value="Female" {% if duser.doctor.gender == "Female" %}selected{% endif %}>Female</option>
+                                    <option value="Other" {% if duser.doctor.gender == "Other" %}selected{% endif %}>Other</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Address</label>
+                        <textarea class="form-control" rows="2" id="edit_address">{{ duser.doctor.address }}</textarea>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Mobile Number</label>
+                                <input type="text" class="form-control" value="{{ duser.doctor.mobile_no }}" id="edit_mobile">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Specialization</label>
+                                <input type="text" class="form-control" value="{{ duser.doctor.specialization }}" id="edit_specialization">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveProfile()" style="background: linear-gradient(45deg, #4ECDC4, #45B7D1); border: none;">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animate elements on scroll
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('fade-in-up');
+            }
+        });
+    }, observerOptions);
+
+    // Observe all cards
+    document.querySelectorAll('.profile-card, .reviews-section').forEach(card => {
+        observer.observe(card);
+    });
+});
+
+function toggleEdit() {
+    $('#editModal').modal('show');
+}
+
+function saveProfile() {
+    const name = document.getElementById('edit_name').value;
+    const gender = document.getElementById('edit_gender').value;
+    const address = document.getElementById('edit_address').value;
+    const mobile = document.getElementById('edit_mobile').value;
+    const specialization = document.getElementById('edit_specialization').value;
+    
+    // Simulate saving
+    const saveBtn = document.querySelector('[onclick="saveProfile()"]');
+    const originalText = saveBtn.innerHTML;
+    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+    saveBtn.disabled = true;
+    
+    setTimeout(() => {
+        // Simulate successful save
+        $('#editModal').modal('hide');
+        saveBtn.innerHTML = originalText;
+        saveBtn.disabled = false;
+        
+        // Show success message
+        const alertHtml = `
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle"></i> Profile updated successfully!
+                <button type="button" class="close" data-dismiss="alert">
+                    <span>&times;</span>
+                </button>
+            </div>
+        `;
+        document.querySelector('.doctor-profile-page .container').insertAdjacentHTML('afterbegin', alertHtml);
+        
+        // Remove alert after 3 seconds
+        setTimeout(() => {
+            const alert = document.querySelector('.alert');
+            if (alert) alert.remove();
+        }, 3000);
+        
+    }, 1500);
+}
+
+// Add click animations to buttons
+document.querySelectorAll('.btn-modern').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+        const ripple = document.createElement('span');
+        ripple.classList.add('ripple');
+        this.appendChild(ripple);
+        
+        setTimeout(() => {
+            ripple.remove();
+        }, 600);
+    });
+});
+</script>
+
+<style>
+/* Ripple effect for buttons */
+.btn-modern {
+    position: relative;
+    overflow: hidden;
+}
+
+.ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.6);
+    transform: scale(0);
+    animation: ripple-animation 0.6s linear;
+    pointer-events: none;
+}
+
+@keyframes ripple-animation {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+</style>
+
+{% endblock %}
+

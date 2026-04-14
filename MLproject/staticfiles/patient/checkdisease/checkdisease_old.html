@@ -1,0 +1,542 @@
+
+
+{% extends "basic.html" %}
+{% load static %}
+
+ 
+    {% block head %}
+
+    <link rel="stylesheet" type="text/css" href="{% static 'patient/checkdisease/dps.css' %}">   
+ 
+
+
+<script>
+
+  /* When the user clicks on the button,
+toggle between hiding and showing the dropdown content */
+function Functionshow() {
+  
+  document.getElementById("searchbar").value = '';
+  document.getElementById("myDropdown").classList.toggle("show");
+   search_symptoms();
+  
+}
+
+
+// Close the dropdown menu if the user clicks outside of it
+window.onclick = function(event) {
+  if (!event.target.matches('.btn')) {
+    if (!event.target.matches('.searchbardiv')){
+      if (!event.target.matches('.searchbar')){
+
+    var dropdowns = document.getElementsByClassName("drop-content");
+    var i;
+    for (i = 0; i < dropdowns.length; i++) {
+      
+      var openDropdown = dropdowns[i];
+      if (openDropdown.classList.contains('show')) {
+        openDropdown.classList.remove('show');
+      }
+    }
+  }
+}
+}
+}
+
+  function Functionsymptoms(name) {
+    var newItem = document.createElement("TEXTAREA");
+    newItem.innerText = name;
+    newItem.setAttribute("id","symptoms");
+    
+    newItem.setAttribute("class","symptoms");
+    document.getElementById("sympbox").appendChild(newItem);
+    
+  }
+
+ 
+  //var elements = document.getElementsByClassName("symptoms");
+
+
+  function search_symptoms() { 
+    let input = document.getElementById('searchbar').value 
+    input=input.toLowerCase(); 
+    let x = document.getElementsByClassName('dropdown-item'); 
+      
+    for (i = 0; i < x.length; i++) {  
+        if (!x[i].innerHTML.toLowerCase().includes(input)) { 
+            x[i].style.display="none"; 
+        } 
+        else { 
+            x[i].style.display="inline-block";                  
+        } 
+    } 
+} 
+
+
+// Tab switching functions
+function showSymptomsTab() {
+  document.getElementById('symptomsSection').style.display = 'block';
+  document.getElementById('imageSection').style.display = 'none';
+  document.getElementById('symptomsTab').classList.add('active');
+  document.getElementById('imageTab').classList.remove('active');
+  // Hide result div when switching tabs
+  document.getElementById('resultdiv').style.display = 'none';
+}
+
+function showImageTab() {
+  document.getElementById('symptomsSection').style.display = 'none';
+  document.getElementById('imageSection').style.display = 'block';
+  document.getElementById('imageTab').classList.add('active');
+  document.getElementById('symptomsTab').classList.remove('active');
+  // Hide result div when switching tabs
+  document.getElementById('resultdiv').style.display = 'none';
+}
+
+// Image upload functionality
+const uploadArea = document.getElementById('uploadArea');
+const imageInput = document.getElementById('skinImageInput');
+const imagePreview = document.getElementById('imagePreview');
+const previewImg = document.getElementById('previewImg');
+const scanBtn = document.getElementById('scanBtn');
+const imageForm = document.getElementById('imageUploadForm');
+const imageLoading = document.getElementById('imageLoading');
+
+// Click to upload
+if (uploadArea) {
+  uploadArea.addEventListener('click', () => {
+    imageInput.click();
+  });
+
+  // Drag and drop
+  uploadArea.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadArea.style.background = '#e7f3ff';
+  });
+
+  uploadArea.addEventListener('dragleave', () => {
+    uploadArea.style.background = '#f8f9fa';
+  });
+
+  uploadArea.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadArea.style.background = '#f8f9fa';
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      imageInput.files = files;
+      handleImageSelect(files[0]);
+    }
+  });
+}
+
+// File input change
+if (imageInput) {
+  imageInput.addEventListener('change', (e) => {
+    if (e.target.files.length > 0) {
+      handleImageSelect(e.target.files[0]);
+    }
+  });
+}
+
+function handleImageSelect(file) {
+  // Validate file type
+  if (!file.type.startsWith('image/')) {
+    alert('Please select a valid image file');
+    return;
+  }
+
+  // Validate file size (10MB)
+  if (file.size > 10 * 1024 * 1024) {
+    alert('File size must be less than 10MB');
+    return;
+  }
+
+  // Show preview
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    previewImg.src = e.target.result;
+    imagePreview.style.display = 'block';
+    scanBtn.disabled = false;
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeImage() {
+  const imageInput = document.getElementById('skinImageInput');
+  const imagePreview = document.getElementById('imagePreview');
+  const scanBtn = document.getElementById('scanBtn');
+  if (imageInput) imageInput.value = '';
+  if (imagePreview) imagePreview.style.display = 'none';
+  if (scanBtn) scanBtn.disabled = true;
+}
+
+$(document).ready( function(){
+  
+  // Image form submission (moved inside document.ready)
+  const imageForm = document.getElementById('imageUploadForm');
+  if (imageForm) {
+    imageForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const imageInput = document.getElementById('skinImageInput');
+      if (!imageInput.files.length) {
+        alert('Please select an image first');
+        return;
+      }
+
+      const formData = new FormData(imageForm);
+      const imageLoading = document.getElementById('imageLoading');
+      const scanBtn = document.getElementById('scanBtn');
+      
+      // Show loading
+      imageLoading.style.display = 'block';
+      scanBtn.disabled = true;
+      document.getElementById('resultdiv').style.display = 'none';
+
+      try {
+        const response = await fetch('{% url "scan_image" %}', {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+          }
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          // Show results
+          document.getElementById('diseasefield').innerText = data.predicteddisease || 'Unknown';
+          document.getElementById('percentage').innerText = (data.confidencescore || '0') + "%";
+          var percent = parseFloat(data.confidencescore || 0);
+          var disease = data.predicteddisease || '';
+          
+          $('#percentage').css('width', percent + "%");
+          document.getElementById('diseasesearch').innerText = disease;
+          $("#href").attr("href", "https://www.google.com/search?q=" + disease);
+          document.getElementById('consultdoctor').innerText = data.consultdoctor || 'Dermatologist';
+          
+          // Show result div
+          $("#resultdiv").show("slow");
+          $('html,body').animate({
+            scrollTop: $("#resultdiv").offset().top},
+            'slow');
+        } else {
+          alert('Error: ' + (data.error || 'Prediction failed'));
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+      } finally {
+        imageLoading.style.display = 'none';
+        scanBtn.disabled = false;
+      }
+    });
+  }
+
+
+$("#predict").click(function () {
+  event.preventDefault();
+
+  var symptoms = document.getElementsByClassName("symptoms");
+  var noofsym = symptoms.length;
+  var symlist=[];
+
+  if(noofsym == 0){
+     alert(" please add some symptoms ");
+  }
+
+  else {
+
+  for(i=0;i<symptoms.length;i++){
+    symlist[i]=symptoms[i].value;
+  }
+  
+
+
+  $("#resultdiv").show("slow");
+  $('html,body').animate({
+    scrollTop: $("#resultdiv").offset().top},
+    'slow');
+       
+
+
+
+  $.ajax({
+      url: 'checkdisease',
+      type: "POST",
+      data: { "noofsym" : noofsym,
+              "symptoms" :symlist,
+              csrfmiddlewaretoken : $('input[name=csrfmiddlewaretoken]').val()
+      },
+      dataType: 'json',
+
+      success: function (data) {
+        document.getElementById('diseasefield').innerText = data["predicteddisease"];
+        document.getElementById('percentage').innerText = data["confidencescore"]+"%";
+        percent=data["confidencescore"];
+        disease=data["predicteddisease"];
+
+        $('#percentage').css('width', percent + "%");
+
+        document.getElementById('diseasesearch').innerText = data["predicteddisease"];
+
+        $("#href").attr("href","https://www.google.com/search?q="+ disease +"");
+
+        
+        document.getElementById('consultdoctor').innerText = data["consultdoctor"];
+
+      }
+      
+    });
+
+  }
+
+  });
+
+
+
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</script>
+
+
+
+{% endblock %}
+
+
+
+
+
+
+
+
+
+{% block body %}
+
+
+
+
+
+<div class="container">
+      <!-- 
+  
+  <div class="dropdown">
+    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      Dropdown button
+    </button>
+    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+      <a class="dropdown-item" href="#">Action</a>
+      <a class="dropdown-item" href="#">Another action</a>
+      <a class="dropdown-item" href="#">Something else here</a>
+    </div>
+  </div> -->
+
+
+  <div class="container">
+    <br>
+    <div class="text-center"> 
+      <h3>
+          Identify possible conditions and treatment related to your symptoms or image.
+      </h3><br>
+      
+      <!-- Toggle between Symptoms and Image Scan -->
+      <div class="btn-group" role="group" style="margin-bottom: 20px;">
+        <button type="button" class="btn btn-primary active" id="symptomsTab" onclick="showSymptomsTab()">
+          <i class="fa fa-list"></i> Check by Symptoms
+        </button>
+        <button type="button" class="btn btn-primary" id="imageTab" onclick="showImageTab()">
+          <i class="fa fa-camera"></i> Scan Image
+        </button>
+      </div>
+    </div>
+  </div >
+  
+  <!-- Symptoms Section -->
+  <div id="symptomsSection">
+    <div class="text-center"> 
+      <button onclick="Functionshow()" class="btn btn-primary dropdown-toggle">Add symptoms</button>
+    </div>
+
+  <div id="myDropdown" class="drop-content">
+
+        <div id="searchbardiv" class="searchbardiv">    
+      
+            <input id="searchbar" class="searchbar" onkeyup="search_symptoms()" type="text"
+              name="search" placeholder=" Search symptoms.. "> <br>
+        </div> 
+
+        <div class="container" id="container-dropdown">
+            {% for i in list2 %}
+            
+            <a class="dropdown-item" onclick="Functionsymptoms(this.textContent)">{{i}}</a>
+            
+            {% endfor %}
+        </div>
+  </div>
+        
+      
+    
+
+
+<!-- 
+
+<div class="dropdown">
+  
+    <button onclick="Functionshow()" class="dropbtn">Add symptoms</button>
+      
+  </div >
+    <div id="myDropdown" class="dropdown-content">
+
+     <div id="searchbardiv" class="searchbardiv">    
+      
+    <input id="searchbar" class="searchbar" onkeyup="search_symptoms()" type="text"
+    name="search" placeholder=" Search symptoms.. "> <br>
+  </div> 
+  <div>
+            {% for i in list2 %}
+            
+            <a class="links" onclick="Functionsymptoms(this.textContent)">{{i}}</a>
+            
+            {% endfor %}
+  </div>
+        </div>
+       -->
+    
+<br><br>
+  <div class="text-center">
+        <div class="card" id= "symptoms-box">
+    
+      {% csrf_token %}
+            <div class="card-header">Symptoms list -</div>
+                    <div class="card-body" id="sympbox" >
+                    </div>
+                          <br>
+                          <div class="card-footer">
+                                <button id="predict" class="btn btn-success">Predict</button>
+                          </div>
+             </div>
+        </div>
+  </div>
+  </div>
+  
+  <!-- Image Scan Section -->
+  <div id="imageSection" style="display: none;">
+    <div class="container" style="max-width: 600px; margin: 0 auto;">
+      <div class="card">
+        <div class="card-header text-center">
+          <h5>Upload Skin Image for Analysis</h5>
+        </div>
+        <div class="card-body">
+          <form id="imageUploadForm" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="upload-area" id="uploadArea" style="border: 3px dashed #007bff; border-radius: 10px; padding: 40px; text-align: center; background: #f8f9fa; cursor: pointer; margin-bottom: 20px;">
+              <input type="file" id="skinImageInput" name="skin_image" accept="image/*" style="display: none;" required>
+              <i class="fa fa-cloud-upload" style="font-size: 48px; color: #007bff; margin-bottom: 20px;"></i>
+              <h5>Click to upload or drag and drop</h5>
+              <p style="color: #6c757d; font-size: 14px;">Supported: JPG, PNG, JPEG (Max 10MB)</p>
+            </div>
+            
+            <div id="imagePreview" style="display: none; margin-bottom: 20px;">
+              <img id="previewImg" style="max-width: 100%; max-height: 300px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.2);" alt="Preview">
+              <button type="button" onclick="removeImage()" class="btn btn-danger btn-sm mt-2">Remove Image</button>
+            </div>
+            
+            <div class="text-center">
+              <button type="submit" class="btn btn-success" id="scanBtn" disabled>
+                <i class="fa fa-search"></i> Scan Image
+              </button>
+            </div>
+            
+            <div class="loading text-center" id="imageLoading" style="display: none; margin-top: 20px;">
+              <div class="spinner-border text-primary" role="status">
+                <span class="sr-only">Loading...</span>
+              </div>
+              <p>Analyzing image...</p>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <br>
+
+  <div id="resultdiv" style="display: none;" >
+        <div class="text-center">
+              <div class="card" id="predicted-data">
+                    <div>
+                            <span class="diseasefield" >Patient name : {{ user.patient.name }}</span>
+                            <span class="diseasefield" >&nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp Age : {{ user.patient.age }} </span>
+                    </div>
+                    <span class="diseasefield" >predicted disease is : </span><span class="diseasefield" id="diseasefield" style="color: #092700; text-shadow: 2px 2px 4px rgb(36, 255, 45);"></span> <br>
+                    <br>
+                    <span class="diseasefield">confidence score of :  </span>
+                    <span>
+                          <div class="progress" style="display: inline-block;width:140px">
+                              <div id="percentage" class="progress-bar" style="width: 0%">0%
+                              </div>
+                          </div>
+                    </span>
+
+                    </div>
+              </div>
+
+        <div class="text-center mt-4 mb-4"> 
+              <button class="btn btn-outline-success">
+                    <a id="href" href="https://www.google.com/search?q=anuj" target="_blank" rel="noopener noreferrer">Click here to know more about &nbsp 
+                    <span id="diseasesearch" style="color: crimson;"></span></a>
+              </button>
+        </div>
+          <br><br>
+
+        <div class="text-center">
+          <h4>This tool does not provide medical advice. It is intended for informational purposes only.
+          </h4><h4>It is not a substitute for professional medical advice, diagnosis or treatment. 
+          </h4>
+        <br><br>
+
+        </div>
+
+
+<div class="mx-auto text-center " style="width:350px">
+  
+     
+        <div >  <form action="consult_a_doctor" method="GET">
+            {% csrf_token %} 
+            <button id="consultbtn" type="submit" class="btn btn-primary"> Consult a <span id="consultdoctor"  name="consultdoctor" > </span> doctor</button>
+          </form>
+        </div>
+      
+ 
+</div>
+
+         
+
+</div>
+
+
+
+
+
+
+
+</div>
+
+
+
+{% endblock %}
